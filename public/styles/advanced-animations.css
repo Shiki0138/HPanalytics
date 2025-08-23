@@ -1,0 +1,490 @@
+/*
+ * Advanced Physics-Based Animations & 3D Effects
+ * Next-Generation Interactive Components 2025
+ */
+
+/* Advanced 3D Transformations */
+@property --rotation-x {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@property --rotation-y {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@property --rotation-z {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@property --scale-3d {
+  syntax: '<number>';
+  initial-value: 1;
+  inherits: false;
+}
+
+/* Particle System Base */
+@property --particle-x {
+  syntax: '<length>';
+  initial-value: 0px;
+  inherits: false;
+}
+
+@property --particle-y {
+  syntax: '<length>';
+  initial-value: 0px;
+  inherits: false;
+}
+
+@property --particle-scale {
+  syntax: '<number>';
+  initial-value: 1;
+  inherits: false;
+}
+
+@property --particle-opacity {
+  syntax: '<number>';
+  initial-value: 1;
+  inherits: false;
+}
+
+/* 3D Metric Cards with Perspective */
+.metric-card-3d {
+  perspective: 1000px;
+  transform-style: preserve-3d;
+  position: relative;
+  background: var(--gradient-quantum);
+  backdrop-filter: blur(20px) saturate(1.8);
+  border: 2px solid color-mix(in oklch, var(--color-primary) 30%, transparent);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-xl);
+  transition: all 0.6s var(--easing-spring);
+  overflow: hidden;
+}
+
+.metric-card-3d::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(
+    from 0deg at 50% 50%,
+    transparent 0deg,
+    color-mix(in oklch, var(--color-primary) 20%, transparent) 90deg,
+    transparent 180deg,
+    color-mix(in oklch, var(--color-secondary) 15%, transparent) 270deg,
+    transparent 360deg
+  );
+  transform: rotate(var(--rotation-z));
+  opacity: 0;
+  transition: all 0.8s var(--easing-smooth);
+  pointer-events: none;
+}
+
+.metric-card-3d:hover::before {
+  opacity: 0.3;
+  --rotation-z: 360deg;
+}
+
+.metric-card-3d:hover {
+  transform: 
+    rotateX(var(--rotation-x)) 
+    rotateY(var(--rotation-y)) 
+    translateZ(20px) 
+    scale3d(var(--scale-3d), var(--scale-3d), 1);
+  --rotation-x: -5deg;
+  --rotation-y: 5deg;
+  --scale-3d: 1.05;
+  box-shadow: 
+    0 30px 60px color-mix(in oklch, var(--color-primary) 20%, transparent),
+    0 0 0 1px color-mix(in oklch, var(--color-primary) 40%, transparent);
+}
+
+/* Floating Data Particles */
+.data-particles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: var(--color-primary);
+  border-radius: 50%;
+  opacity: var(--particle-opacity);
+  transform: 
+    translateX(var(--particle-x)) 
+    translateY(var(--particle-y)) 
+    scale(var(--particle-scale));
+  animation: particleFloat 8s ease-in-out infinite;
+}
+
+.particle:nth-child(odd) {
+  background: var(--color-secondary);
+  animation-delay: -2s;
+}
+
+.particle:nth-child(3n) {
+  background: var(--color-accent);
+  animation-delay: -4s;
+}
+
+@keyframes particleFloat {
+  0%, 100% {
+    --particle-x: 0px;
+    --particle-y: 0px;
+    --particle-scale: 0.5;
+    --particle-opacity: 0;
+  }
+  10% {
+    --particle-opacity: 1;
+    --particle-scale: 1;
+  }
+  50% {
+    --particle-x: 200px;
+    --particle-y: -100px;
+    --particle-scale: 0.8;
+    --particle-opacity: 0.7;
+  }
+  90% {
+    --particle-opacity: 0.3;
+  }
+}
+
+/* Neural Network Connections */
+.neural-connections {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.connection-line {
+  position: absolute;
+  height: 2px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    color-mix(in oklch, var(--color-primary) 40%, transparent) 50%,
+    transparent 100%);
+  transform-origin: left center;
+  animation: connectionPulse 3s ease-in-out infinite;
+}
+
+@keyframes connectionPulse {
+  0%, 100% {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+/* Morphing Button System */
+.morph-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-md) var(--space-xl);
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius-xl);
+  background: transparent;
+  color: var(--color-primary);
+  font-weight: 600;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.4s var(--easing-spring);
+}
+
+.morph-button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0%;
+  height: 0%;
+  background: var(--gradient-neural);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.6s var(--easing-bounce);
+  z-index: -1;
+}
+
+.morph-button:hover::before {
+  width: 300%;
+  height: 300%;
+}
+
+.morph-button:hover {
+  color: white;
+  border-color: transparent;
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: var(--shadow-xl);
+}
+
+/* Advanced Loading Animation */
+.quantum-loader {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  margin: 20px auto;
+}
+
+.quantum-loader::before,
+.quantum-loader::after,
+.quantum-loader {
+  border-radius: 50%;
+}
+
+.quantum-loader::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    var(--color-primary) 90deg,
+    transparent 180deg,
+    var(--color-secondary) 270deg,
+    transparent 360deg
+  );
+  animation: quantumSpin 2s linear infinite;
+}
+
+.quantum-loader::after {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: calc(100% - 20px);
+  height: calc(100% - 20px);
+  background: var(--color-background);
+  animation: quantumPulse 2s ease-in-out infinite;
+}
+
+@keyframes quantumSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes quantumPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(0.8);
+    opacity: 0.7;
+  }
+}
+
+/* Holographic Text Effect */
+.holographic-text {
+  background: var(--gradient-neural);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  position: relative;
+  animation: holographicShift 4s ease-in-out infinite;
+}
+
+.holographic-text::before {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 2px;
+  color: var(--color-secondary);
+  opacity: 0.3;
+  animation: glitchShift 0.3s ease-in-out infinite alternate;
+}
+
+.holographic-text::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: -2px;
+  color: var(--color-accent);
+  opacity: 0.3;
+  animation: glitchShift 0.3s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes holographicShift {
+  0%, 100% {
+    filter: hue-rotate(0deg);
+  }
+  33% {
+    filter: hue-rotate(120deg);
+  }
+  66% {
+    filter: hue-rotate(240deg);
+  }
+}
+
+@keyframes glitchShift {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(2px);
+  }
+}
+
+/* Advanced Magnetic Cursor Effect */
+.magnetic-element {
+  position: relative;
+  transition: transform 0.2s ease;
+  cursor: pointer;
+}
+
+.magnetic-element:hover {
+  transform: perspective(1000px) rotateX(5deg) rotateY(-5deg);
+}
+
+/* Data Flow Animation */
+.data-flow {
+  position: relative;
+  overflow: hidden;
+}
+
+.data-flow::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    color-mix(in oklch, var(--color-primary) 20%, transparent) 20%,
+    color-mix(in oklch, var(--color-primary) 40%, transparent) 40%,
+    color-mix(in oklch, var(--color-secondary) 30%, transparent) 60%,
+    transparent 100%);
+  animation: dataFlowMove 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes dataFlowMove {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* Reactive Visual Feedback */
+.reactive-feedback {
+  position: relative;
+  overflow: hidden;
+}
+
+.reactive-feedback::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: radial-gradient(circle,
+    color-mix(in oklch, var(--color-primary) 30%, transparent) 0%,
+    transparent 70%);
+  transform: translate(-50%, -50%);
+  transition: all 0.6s var(--easing-bounce);
+  pointer-events: none;
+}
+
+.reactive-feedback:hover::after {
+  width: 200px;
+  height: 200px;
+}
+
+/* Breath Animation for Live Elements */
+.breath-animation {
+  animation: breathe 4s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  50% {
+    transform: scale(1.02);
+    filter: brightness(1.1);
+  }
+}
+
+/* Advanced Parallax Scrolling Effect */
+.parallax-layer {
+  transform: translateZ(0);
+  transition: transform 0.1s ease-out;
+}
+
+.parallax-layer[data-speed="slow"] {
+  transform: translateY(calc(var(--scroll-y) * 0.2px));
+}
+
+.parallax-layer[data-speed="medium"] {
+  transform: translateY(calc(var(--scroll-y) * 0.5px));
+}
+
+.parallax-layer[data-speed="fast"] {
+  transform: translateY(calc(var(--scroll-y) * 0.8px));
+}
+
+/* Responsive Animation Controls */
+@media (prefers-reduced-motion: reduce) {
+  .metric-card-3d,
+  .morph-button,
+  .quantum-loader,
+  .holographic-text,
+  .particle,
+  .connection-line,
+  .data-flow::before,
+  .reactive-feedback::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  .metric-card-3d:hover {
+    transform: none !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .metric-card-3d {
+    perspective: 500px;
+  }
+  
+  .metric-card-3d:hover {
+    --rotation-x: -2deg;
+    --rotation-y: 2deg;
+    --scale-3d: 1.02;
+  }
+  
+  .particle {
+    display: none; /* Reduce particles on mobile for performance */
+  }
+}
