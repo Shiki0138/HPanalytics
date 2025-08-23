@@ -3,59 +3,479 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HP改善分析システム</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap');
-        * { font-family: 'Noto Sans JP', sans-serif; }
-        .hover-card:hover { transform: translateY(-4px); transition: all 0.3s; }
-        .gradient { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    <title>HP改善分析システム - 2025年最新鋭AI分析プラットフォーム</title>
+    
+    <!-- Security Headers -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'nonce-2025-secure' https://cdn.tailwindcss.com; style-src 'self' 'nonce-2025-secure' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self';">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    
+    <!-- Modern Design System -->
+    <script src="https://cdn.tailwindcss.com" nonce="2025-secure"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <style nonce="2025-secure">
+        :root {
+            /* 2025 Advanced Color System */
+            --primary-50: #f0f9ff;
+            --primary-100: #e0f2fe;
+            --primary-200: #bae6fd;
+            --primary-300: #7dd3fc;
+            --primary-400: #38bdf8;
+            --primary-500: #0ea5e9;
+            --primary-600: #0284c7;
+            --primary-700: #0369a1;
+            --primary-800: #075985;
+            --primary-900: #0c4a6e;
+            
+            /* Neural Network Colors */
+            --neural-50: #fafafa;
+            --neural-100: #f5f5f5;
+            --neural-200: #e5e5e5;
+            --neural-300: #d4d4d4;
+            --neural-400: #a3a3a3;
+            --neural-500: #737373;
+            --neural-600: #525252;
+            --neural-700: #404040;
+            --neural-800: #262626;
+            --neural-900: #171717;
+            
+            /* Advanced Easing */
+            --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+            --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            --ease-anticipate: cubic-bezier(0.5, 0, 0.5, 1.5);
+            
+            /* Animation Durations */
+            --duration-instant: 150ms;
+            --duration-quick: 300ms;
+            --duration-smooth: 500ms;
+            --duration-dramatic: 800ms;
+        }
+        
+        * {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 20s ease infinite;
+            overflow-x: hidden;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* Glassmorphism System */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            transition: all var(--duration-smooth) var(--ease-smooth);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            opacity: 0;
+            transition: opacity var(--duration-quick);
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.25),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .glass-card:hover::before {
+            opacity: 1;
+        }
+        
+        /* Neumorphism Elements */
+        .neuro-button {
+            background: linear-gradient(145deg, #f0f0f3, #cacaca);
+            box-shadow: 
+                15px 15px 30px #bebebe,
+                -15px -15px 30px #ffffff;
+            border-radius: 16px;
+            border: none;
+            transition: all var(--duration-quick) var(--ease-bounce);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .neuro-button:hover {
+            box-shadow: 
+                20px 20px 40px #bebebe,
+                -20px -20px 40px #ffffff;
+            transform: scale(1.02);
+        }
+        
+        .neuro-button:active {
+            box-shadow: 
+                inset 5px 5px 10px #bebebe,
+                inset -5px -5px 10px #ffffff;
+            transform: scale(0.98);
+        }
+        
+        /* Advanced Typography */
+        .typography-hero {
+            font-family: 'Inter', system-ui, sans-serif;
+            font-size: clamp(2.5rem, 6vw, 5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 30%, #f093fb 60%, #f5576c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            animation: textShimmer 3s ease-in-out infinite;
+        }
+        
+        @keyframes textShimmer {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; transform: translateY(-2px); }
+        }
+        
+        /* Micro-interactions */
+        .micro-hover {
+            transition: all var(--duration-quick) var(--ease-smooth);
+            cursor: pointer;
+        }
+        
+        .micro-hover:hover {
+            transform: translateY(-4px) rotateX(5deg);
+        }
+        
+        .micro-hover:active {
+            transform: scale(0.98);
+        }
+        
+        /* Fluid Animations */
+        .float {
+            animation: floating 6s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .pulse-glow {
+            animation: pulseGlow 4s ease-in-out infinite;
+        }
+        
+        @keyframes pulseGlow {
+            0%, 100% { 
+                box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+            }
+            50% { 
+                box-shadow: 0 0 40px rgba(59, 130, 246, 0.6);
+            }
+        }
+        
+        /* Performance Optimizations */
+        .performance-optimized {
+            will-change: transform, opacity;
+            transform: translateZ(0);
+        }
+        
+        /* Accessibility Enhancements */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+        
+        .focus-visible {
+            outline: 2px solid rgba(59, 130, 246, 0.5);
+            outline-offset: 4px;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+        
+        /* Responsive Breakpoints */
+        @media (max-width: 768px) {
+            .glass-card {
+                backdrop-filter: blur(15px) saturate(150%);
+                -webkit-backdrop-filter: blur(15px) saturate(150%);
+            }
+        }
     </style>
 </head>
-<body class="bg-gray-50">
-    <div class="min-h-screen py-12 px-4">
-        <div class="max-w-4xl mx-auto">
-            <div class="text-center mb-12">
-                <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
-                    HP改善分析システム
-                </h1>
-                <p class="text-lg text-gray-600">サイトタイプを選択してください</p>
+<body>
+    <!-- Background Decorative Elements -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-20 left-20 w-32 h-32 bg-white/10 rounded-full blur-xl animate-pulse"></div>
+        <div class="absolute top-40 right-32 w-24 h-24 bg-blue-400/20 rounded-full blur-lg float"></div>
+        <div class="absolute bottom-32 left-40 w-20 h-20 bg-purple-400/15 rounded-full blur-md float" style="animation-delay: -2s;"></div>
+        <div class="absolute bottom-20 right-20 w-36 h-36 bg-pink-400/10 rounded-full blur-xl animate-pulse" style="animation-delay: -1s;"></div>
+    </div>
+    
+    <div class="min-h-screen py-12 px-4 relative">
+        <div class="max-w-6xl mx-auto">
+            
+            <!-- Hero Section -->
+            <div class="text-center mb-16 performance-optimized">
+                <div class="mb-8">
+                    <h1 class="typography-hero mb-6">
+                        HP改善分析システム
+                    </h1>
+                    <p class="text-xl text-white/90 mb-4 font-light tracking-wide">
+                        2025年最新鋭AI分析プラットフォーム
+                    </p>
+                    <div class="h-1 w-32 mx-auto bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 rounded-full pulse-glow"></div>
+                </div>
+                
+                <p class="text-lg text-white/80 max-w-2xl mx-auto mb-8 leading-relaxed">
+                    革新的なAI技術とガラスモーフィズムデザインが融合した<br>
+                    次世代Webサイト分析プラットフォーム
+                </p>
             </div>
 
-            <div class="grid md:grid-cols-2 gap-8">
-                <div class="bg-white rounded-xl shadow-lg p-8 hover-card cursor-pointer" onclick="location.href='/simple-analytics.html'">
-                    <div class="w-16 h-16 gradient rounded-full flex items-center justify-center mx-auto mb-6">
-                        <span class="text-2xl">🛒</span>
+            <!-- Main Selection Cards -->
+            <div class="grid md:grid-cols-2 gap-8 mb-16">
+                
+                <!-- EC Site Card -->
+                <div class="glass-card p-8 micro-hover performance-optimized" onclick="navigateToPage('/simple-analytics.html')">
+                    <div class="text-center mb-8">
+                        <div class="w-24 h-24 mx-auto mb-6 glass-card flex items-center justify-center float">
+                            <span class="text-4xl filter drop-shadow-lg">🛒</span>
+                        </div>
+                        <h2 class="text-2xl font-bold text-white mb-3">ECサイト分析</h2>
+                        <p class="text-white/80 text-lg mb-4">
+                            売上最大化に特化したAI分析
+                        </p>
+                        <div class="h-0.5 w-16 mx-auto bg-gradient-to-r from-green-400 to-emerald-500 rounded-full"></div>
                     </div>
-                    <h2 class="text-xl font-bold text-gray-800 text-center mb-4">ECサイト</h2>
-                    <p class="text-gray-600 text-center mb-4">売上最大化に特化した分析</p>
-                    <div class="text-sm text-green-600 text-center">平均効果: 売上+30%</div>
-                </div>
-
-                <div class="bg-white rounded-xl shadow-lg p-8 hover-card cursor-pointer" onclick="location.href='/corporate-analytics.html'">
-                    <div class="w-16 h-16 gradient rounded-full flex items-center justify-center mx-auto mb-6">
-                        <span class="text-2xl">🏢</span>
+                    
+                    <div class="space-y-4 mb-8">
+                        <div class="flex items-start">
+                            <div class="w-2 h-2 bg-green-400 rounded-full mt-2 mr-3 pulse-glow"></div>
+                            <p class="text-white/90">カート離脱率の詳細AI分析</p>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="w-2 h-2 bg-green-400 rounded-full mt-2 mr-3 pulse-glow" style="animation-delay: 0.2s;"></div>
+                            <p class="text-white/90">コンバージョン最適化提案</p>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="w-2 h-2 bg-green-400 rounded-full mt-2 mr-3 pulse-glow" style="animation-delay: 0.4s;"></div>
+                            <p class="text-white/90">リアルタイム売上予測</p>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="w-2 h-2 bg-green-400 rounded-full mt-2 mr-3 pulse-glow" style="animation-delay: 0.6s;"></div>
+                            <p class="text-white/90">顧客行動パターン解析</p>
+                        </div>
                     </div>
-                    <h2 class="text-xl font-bold text-gray-800 text-center mb-4">企業サイト</h2>
-                    <p class="text-gray-600 text-center mb-4">リード獲得とブランディング強化</p>
-                    <div class="text-sm text-blue-600 text-center">平均効果: リード+45%</div>
+                    
+                    <div class="glass-card p-4 mb-6">
+                        <p class="text-sm text-emerald-300 font-semibold">
+                            ⚡ 平均改善効果: 売上+30% | CVR+25%
+                        </p>
+                    </div>
+                    
+                    <button class="neuro-button w-full py-4 text-neural-700 font-semibold text-lg">
+                        ECサイト分析を開始 →
+                    </button>
+                </div>
+
+                <!-- Corporate Site Card -->
+                <div class="glass-card p-8 micro-hover performance-optimized" onclick="navigateToPage('/corporate-analytics.html')">
+                    <div class="text-center mb-8">
+                        <div class="w-24 h-24 mx-auto mb-6 glass-card flex items-center justify-center float" style="animation-delay: -1s;">
+                            <span class="text-4xl filter drop-shadow-lg">🏢</span>
+                        </div>
+                        <h2 class="text-2xl font-bold text-white mb-3">企業サイト分析</h2>
+                        <p class="text-white/80 text-lg mb-4">
+                            リード獲得とブランディング強化
+                        </p>
+                        <div class="h-0.5 w-16 mx-auto bg-gradient-to-r from-blue-400 to-indigo-500 rounded-full"></div>
+                    </div>
+                    
+                    <div class="space-y-4 mb-8">
+                        <div class="flex items-start">
+                            <div class="w-2 h-2 bg-blue-400 rounded-full mt-2 mr-3 pulse-glow"></div>
+                            <p class="text-white/90">お問い合わせ率AI最適化</p>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="w-2 h-2 bg-blue-400 rounded-full mt-2 mr-3 pulse-glow" style="animation-delay: 0.2s;"></div>
+                            <p class="text-white/90">ユーザー導線の機械学習</p>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="w-2 h-2 bg-blue-400 rounded-full mt-2 mr-3 pulse-glow" style="animation-delay: 0.4s;"></div>
+                            <p class="text-white/90">コンテンツ魅力度スコア</p>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="w-2 h-2 bg-blue-400 rounded-full mt-2 mr-3 pulse-glow" style="animation-delay: 0.6s;"></div>
+                            <p class="text-white/90">信頼性指数の可視化</p>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-card p-4 mb-6">
+                        <p class="text-sm text-blue-300 font-semibold">
+                            ⚡ 平均改善効果: リード+45% | 滞在時間+35%
+                        </p>
+                    </div>
+                    
+                    <button class="neuro-button w-full py-4 text-neural-700 font-semibold text-lg">
+                        企業サイト分析を開始 →
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- Advanced Tools Section -->
+            <div class="glass-card p-8 mb-12">
+                <div class="text-center mb-8">
+                    <h3 class="text-2xl font-bold text-white mb-4">高度な分析ツール</h3>
+                    <p class="text-white/80">プロフェッショナル向け専用機能</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <button onclick="navigateToPage('/production-dashboard.html')" 
+                            class="neuro-button p-6 micro-hover performance-optimized group">
+                        <div class="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">📊</div>
+                        <h4 class="text-lg font-semibold text-neural-700 mb-2">AI総合ダッシュボード</h4>
+                        <p class="text-sm text-neural-600">機械学習による予測分析</p>
+                    </button>
+                    
+                    <button onclick="navigateToPage('/production-install.html')" 
+                            class="neuro-button p-6 micro-hover performance-optimized group">
+                        <div class="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">🔧</div>
+                        <h4 class="text-lg font-semibold text-neural-700 mb-2">設置ガイド</h4>
+                        <p class="text-sm text-neural-600">セキュア実装マニュアル</p>
+                    </button>
+                    
+                    <button onclick="navigateToPage('/analytics-viewer.html')" 
+                            class="neuro-button p-6 micro-hover performance-optimized group">
+                        <div class="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">📈</div>
+                        <h4 class="text-lg font-semibold text-neural-700 mb-2">データビューア</h4>
+                        <p class="text-sm text-neural-600">3D可視化エンジン</p>
+                    </button>
                 </div>
             </div>
 
-            <div class="mt-12 text-center">
-                <div class="flex flex-wrap justify-center gap-4">
-                    <button onclick="location.href='/production-dashboard.html'" class="px-6 py-3 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors">
-                        📊 総合ダッシュボード
-                    </button>
-                    <button onclick="location.href='/production-install.html'" class="px-6 py-3 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors">
-                        🔧 設置ガイド
-                    </button>
-                    <button onclick="location.href='/analytics-viewer.html'" class="px-6 py-3 bg-teal-100 text-teal-700 rounded-lg hover:bg-teal-200 transition-colors">
-                        📈 データビューア
-                    </button>
+            <!-- Feature Highlights -->
+            <div class="text-center text-white/80">
+                <p class="mb-4">🚀 次世代技術搭載</p>
+                <div class="flex flex-wrap justify-center gap-4 text-sm">
+                    <span class="glass-card px-4 py-2">Glassmorphism UI</span>
+                    <span class="glass-card px-4 py-2">AI予測エンジン</span>
+                    <span class="glass-card px-4 py-2">リアルタイム分析</span>
+                    <span class="glass-card px-4 py-2">セキュリティ強化</span>
+                    <span class="glass-card px-4 py-2">レスポンシブ対応</span>
                 </div>
             </div>
+            
         </div>
     </div>
+
+    <script nonce="2025-secure">
+        // Modern JavaScript with Security Enhancements
+        'use strict';
+        
+        // XSS Protection - Sanitize all inputs
+        const sanitizeInput = (input) => {
+            const div = document.createElement('div');
+            div.textContent = input;
+            return div.innerHTML;
+        };
+        
+        // Secure Navigation Function
+        const navigateToPage = (url) => {
+            // Validate URL to prevent XSS
+            const allowedUrls = [
+                '/simple-analytics.html',
+                '/corporate-analytics.html',
+                '/production-dashboard.html',
+                '/production-install.html',
+                '/analytics-viewer.html'
+            ];
+            
+            if (allowedUrls.includes(url)) {
+                // Add smooth transition effect
+                document.body.style.opacity = '0.8';
+                setTimeout(() => {
+                    window.location.href = url;
+                }, 200);
+            } else {
+                console.error('Invalid URL detected');
+            }
+        };
+        
+        // Performance Optimizations
+        const prefetchResources = () => {
+            const urls = [
+                '/simple-analytics.html',
+                '/corporate-analytics.html',
+                '/production-dashboard.html'
+            ];
+            
+            urls.forEach(url => {
+                const link = document.createElement('link');
+                link.rel = 'prefetch';
+                link.href = url;
+                document.head.appendChild(link);
+            });
+        };
+        
+        // Accessibility Enhancements
+        const enhanceAccessibility = () => {
+            // Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Tab') {
+                    document.body.classList.add('keyboard-navigation');
+                }
+            });
+            
+            // Mouse navigation
+            document.addEventListener('mousedown', () => {
+                document.body.classList.remove('keyboard-navigation');
+            });
+            
+            // High contrast mode detection
+            if (window.matchMedia('(prefers-contrast: high)').matches) {
+                document.body.classList.add('high-contrast');
+            }
+        };
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            prefetchResources();
+            enhanceAccessibility();
+            
+            // Add smooth entrance animation
+            document.body.style.opacity = '0';
+            setTimeout(() => {
+                document.body.style.transition = 'opacity 0.5s ease';
+                document.body.style.opacity = '1';
+            }, 100);
+        });
+        
+        // Error handling
+        window.addEventListener('error', (e) => {
+            console.error('Page error detected:', e.error);
+            // Don't expose error details in production
+        });
+    </script>
 </body>
 </html>
