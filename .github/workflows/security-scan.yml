@@ -1,0 +1,461 @@
+name: 🛡️ Security Scan
+
+on:
+  schedule:
+    # Run security scan daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  push:
+    branches: [ main ]
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - '.github/workflows/security-scan.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+  workflow_dispatch:
+    inputs:
+      scan_type:
+        description: 'Type of security scan to run'
+        required: true
+        default: 'full'
+        type: choice
+        options:
+          - full
+          - quick
+          - dependencies-only
+
+env:
+  NODE_VERSION: '18'
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  # Dependency Security Scan
+  dependency-scan:
+    name: 🔍 Dependency Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: 📦 Install Dependencies
+        run: |
+          cd backend && npm ci
+          cd frontend && npm ci
+          cd backend/ai-engine && pip install -r requirements.txt
+
+      # Node.js Security Audits
+      - name: 🔒 NPM Security Audit - Backend
+        working-directory: ./backend
+        run: |
+          npm audit --audit-level=moderate --json > npm-audit-backend.json || true
+          npm audit --audit-level=moderate || true
+
+      - name: 🔒 NPM Security Audit - Frontend
+        working-directory: ./frontend
+        run: |
+          npm audit --audit-level=moderate --json > npm-audit-frontend.json || true
+          npm audit --audit-level=moderate || true
+
+      # Python Security Audits
+      - name: 🔒 Python Safety Check
+        working-directory: ./backend/ai-engine
+        run: |
+          pip install safety
+          safety check --json --output safety-report.json || true
+          safety check || true
+
+      - name: 🔒 Python Bandit Security Scan
+        working-directory: ./backend/ai-engine
+        run: |
+          pip install bandit[toml]
+          bandit -r . -f json -o bandit-security-report.json || true
+          bandit -r . || true
+
+      # License Compliance Check
+      - name: 📄 License Compliance Check
+        run: |
+          cd backend && npx license-checker --json --out backend-licenses.json || true
+          cd frontend && npx license-checker --json --out frontend-licenses.json || true
+
+      # Upload results
+      - name: 📊 Upload Dependency Scan Results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: dependency-security-reports
+          path: |
+            backend/npm-audit-backend.json
+            frontend/npm-audit-frontend.json
+            backend/ai-engine/safety-report.json
+            backend/ai-engine/bandit-security-report.json
+            backend/backend-licenses.json
+            frontend/frontend-licenses.json
+          retention-days: 30
+
+  # Code Security Analysis
+  code-security:
+    name: 🔍 Code Security Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      # Semgrep Security Analysis
+      - name: 🔍 Semgrep Security Analysis
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: >-
+            p/security-audit
+            p/secrets
+            p/owasp-top-ten
+            p/javascript
+            p/typescript
+            p/python
+          generateSarif: "1"
+        env:
+          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+
+      # CodeQL Analysis
+      - name: 🔍 CodeQL Security Analysis
+        uses: github/codeql-action/init@v2
+        with:
+          languages: 'javascript,python,typescript'
+          queries: security-extended,security-and-quality
+
+      - name: 🏗️ Autobuild for CodeQL
+        uses: github/codeql-action/autobuild@v2
+
+      - name: 📊 Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+        with:
+          category: "/language:${{matrix.language}}"
+
+      # Trivy File System Scan
+      - name: 🔍 Trivy FS Security Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: 📊 Upload Trivy Results to Security Tab
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # Container Security Scan
+  container-security:
+    name: 🐳 Container Security Scan
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event.inputs.scan_type == 'full'
+    
+    strategy:
+      matrix:
+        component: [backend, frontend, ai-engine]
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐳 Build Docker Image
+        run: |
+          docker build -t security-scan-${{ matrix.component }}:latest ./${{ matrix.component }}
+
+      - name: 🔍 Trivy Container Security Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'security-scan-${{ matrix.component }}:latest'
+          format: 'sarif'
+          output: 'container-${{ matrix.component }}-trivy.sarif'
+
+      - name: 🔍 Docker Scout Security Analysis
+        uses: docker/scout-action@v1
+        with:
+          command: cves
+          image: security-scan-${{ matrix.component }}:latest
+          format: sarif
+          output: container-${{ matrix.component }}-scout.sarif
+        continue-on-error: true
+
+      - name: 📊 Upload Container Security Results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: container-security-reports
+          path: |
+            container-${{ matrix.component }}-trivy.sarif
+            container-${{ matrix.component }}-scout.sarif
+          retention-days: 30
+
+  # OWASP ZAP Dynamic Security Testing
+  zap-security:
+    name: 🕷️ OWASP ZAP Security Scan
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event.inputs.scan_type == 'full'
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: security_test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies and Start Services
+        run: |
+          cd backend && npm ci
+          cd frontend && npm ci
+
+      - name: 🗄️ Setup Test Database
+        working-directory: ./backend
+        run: |
+          npm run prisma:migrate
+          npm run prisma:seed
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/security_test_db
+
+      - name: 🚀 Start Application
+        run: |
+          cd backend && npm run dev &
+          cd frontend && npm run dev &
+          sleep 45
+        env:
+          NODE_ENV: development
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/security_test_db
+          REDIS_URL: redis://localhost:6379
+
+      - name: 🕷️ OWASP ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.10.0
+        with:
+          target: 'http://localhost:3000'
+          rules_file_name: '.zap/rules.tsv'
+          cmd_options: '-a -j -l WARN -z "-configFile /zap/wrk/.zap/zap.conf"'
+          allow_issue_writing: false
+
+      - name: 🕷️ OWASP ZAP Full Scan
+        uses: zaproxy/action-full-scan@v0.8.0
+        with:
+          target: 'http://localhost:3000'
+          rules_file_name: '.zap/rules.tsv'
+          cmd_options: '-a -j -l WARN'
+          allow_issue_writing: false
+        continue-on-error: true
+
+      - name: 📊 Upload ZAP Reports
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: zap-security-reports
+          path: |
+            report_html.html
+            report_json.json
+            report_md.md
+          retention-days: 30
+
+  # Infrastructure Security
+  infrastructure-security:
+    name: 🏗️ Infrastructure Security
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event.inputs.scan_type == 'full'
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      # Checkov Infrastructure Security
+      - name: 🔍 Checkov Infrastructure Security Scan
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: .
+          quiet: true
+          soft_fail: true
+          framework: dockerfile,github_configuration,secrets
+          output_format: sarif
+          output_file_path: checkov-results.sarif
+
+      - name: 📊 Upload Checkov Results
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: checkov-results.sarif
+
+      # Secrets Detection
+      - name: 🔍 Secrets Detection with TruffleHog
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: main
+          head: HEAD
+          extra_args: --debug --only-verified
+
+  # Security Report Generation
+  security-report:
+    name: 📊 Security Report Generation
+    runs-on: ubuntu-latest
+    needs: [dependency-scan, code-security, zap-security]
+    if: always()
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📥 Download All Security Reports
+        uses: actions/download-artifact@v3
+        with:
+          path: security-reports/
+
+      - name: 🐍 Setup Python for Report Generation
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: 📊 Generate Security Dashboard
+        run: |
+          pip install jinja2 matplotlib seaborn pandas
+          python .github/scripts/generate-security-report.py
+          
+      - name: 📊 Upload Consolidated Security Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: consolidated-security-report
+          path: |
+            security-dashboard.html
+            security-summary.json
+            security-metrics.png
+          retention-days: 90
+
+      - name: 📢 Create Security Issue
+        uses: actions/github-script@v7
+        if: contains(needs.*.result, 'failure')
+        with:
+          script: |
+            const title = '🚨 Security Vulnerabilities Detected - ' + new Date().toISOString().split('T')[0];
+            const body = `
+            ## 🛡️ Security Scan Results
+            
+            **Scan Date:** ${new Date().toISOString()}
+            **Branch:** ${{ github.ref }}
+            **Commit:** ${{ github.sha }}
+            
+            ### ⚠️ High Priority Issues Found
+            
+            Security vulnerabilities have been detected in the latest scan. Please review the detailed reports in the workflow artifacts.
+            
+            ### 📊 Quick Actions Required:
+            
+            1. Review dependency vulnerabilities
+            2. Address code security issues  
+            3. Check container security findings
+            4. Validate infrastructure configurations
+            
+            ### 📋 Resources:
+            
+            - [Workflow Run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            - [Security Reports Artifact](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            
+            /cc @security-team
+            `;
+            
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              labels: ['security', 'high-priority', 'automated']
+            });
+
+  # Security Notification
+  notify-security:
+    name: 📢 Security Notification
+    runs-on: ubuntu-latest
+    needs: [security-report]
+    if: always() && contains(needs.*.result, 'failure')
+    
+    steps:
+      - name: 📧 Security Alert Email
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "🚨 URGENT: Security Vulnerabilities Detected in AI Analytics"
+          to: ${{ secrets.SECURITY_TEAM_EMAIL }}
+          cc: ${{ secrets.NOTIFICATION_EMAIL }}
+          from: AI Analytics Security Scanner
+          body: |
+            🚨 SECURITY ALERT 🚨
+            
+            Security vulnerabilities have been detected in the AI Analytics system.
+            
+            Scan Details:
+            - Repository: ${{ github.repository }}
+            - Branch: ${{ github.ref }}
+            - Commit: ${{ github.sha }}
+            - Triggered by: ${{ github.actor }}
+            
+            Please review the security reports immediately:
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            
+            This is an automated security alert.
+
+      - name: 📢 Slack Security Alert
+        uses: 8398a7/action-slack@v3
+        with:
+          status: failure
+          channel: '#security-alerts'
+          title: '🚨 Security Vulnerabilities Detected'
+          text: |
+            Security scan has detected vulnerabilities in AI Analytics system.
+            
+            📊 Repository: ${{ github.repository }}
+            🌿 Branch: ${{ github.ref }}
+            👤 Author: ${{ github.actor }}
+            🔗 Details: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            
+            Please review and address immediately.
+          webhook_url: ${{ secrets.SECURITY_SLACK_WEBHOOK }}

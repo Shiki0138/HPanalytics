@@ -1,0 +1,31 @@
+FROM python:3.11-slim
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /app
+
+# Install Python dependencies
+COPY requirements-security.txt .
+RUN pip install --no-cache-dir -r requirements-security.txt
+
+# Copy security test scripts
+COPY zap-security-test.py .
+COPY security-test-runner.sh .
+
+# Make scripts executable
+RUN chmod +x security-test-runner.sh
+
+# Create reports directory
+RUN mkdir -p security-reports
+
+# Set environment variables
+ENV PYTHONPATH=/app
+ENV SECURITY_TEST_URL=http://host.docker.internal:3000
+ENV ZAP_PROXY=zap:8080
+
+CMD ["python3", "zap-security-test.py"]

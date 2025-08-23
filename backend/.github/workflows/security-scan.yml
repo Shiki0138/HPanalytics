@@ -1,0 +1,376 @@
+name: Security Scanning
+
+on:
+  schedule:
+    # Run security scans daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+env:
+  AWS_REGION: us-west-2
+
+jobs:
+  # SAST - Static Application Security Testing
+  sast-scan:
+    runs-on: ubuntu-latest
+    name: Static Code Analysis
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: javascript, python
+          queries: security-extended,security-and-quality
+      
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v2
+      
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+        with:
+          category: "/language:javascript"
+      
+      - name: Run Semgrep
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: >-
+            p/security-audit
+            p/secrets
+            p/owasp-top-ten
+            p/nodejs
+            p/python
+          publishToken: ${{ secrets.SEMGREP_APP_TOKEN }}
+
+  # SCA - Software Composition Analysis
+  sca-scan:
+    runs-on: ubuntu-latest
+    name: Dependency Vulnerability Scan
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+      
+      - name: Install Dependencies
+        run: npm ci
+      
+      - name: Audit npm Dependencies
+        run: npm audit --audit-level=moderate
+        continue-on-error: true
+      
+      - name: Run Snyk Security Scan
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+        continue-on-error: true
+      
+      - name: Run OWASP Dependency Check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: 'hp-analysis-system'
+          path: '.'
+          format: 'ALL'
+          args: >
+            --enableRetired
+            --enableExperimental
+            --suppression suppression.xml
+      
+      - name: Upload Dependency Check Results
+        uses: actions/upload-artifact@v3
+        with:
+          name: dependency-check-report
+          path: reports/
+      
+      - name: Python Dependencies Security Scan
+        run: |
+          cd ai-engine
+          pip install safety
+          safety check --json --output safety-report.json || true
+        continue-on-error: true
+      
+      - name: Upload Python Security Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: python-security-report
+          path: ai-engine/safety-report.json
+
+  # Container Security Scanning
+  container-scan:
+    runs-on: ubuntu-latest
+    name: Container Security Scan
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Build App Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          load: true
+          tags: hp-analysis-app:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      - name: Build AI Engine Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./ai-engine
+          file: ./ai-engine/Dockerfile
+          load: true
+          tags: hp-analysis-ai-engine:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      - name: Scan App Image with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'hp-analysis-app:latest'
+          format: 'sarif'
+          output: 'trivy-app-results.sarif'
+      
+      - name: Scan AI Engine Image with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'hp-analysis-ai-engine:latest'
+          format: 'sarif'
+          output: 'trivy-ai-engine-results.sarif'
+      
+      - name: Upload Trivy Scan Results
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-app-results.sarif'
+      
+      - name: Upload AI Engine Trivy Results
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-ai-engine-results.sarif'
+      
+      - name: Run Dockle Security Scan
+        run: |
+          curl -L -o dockle.deb https://github.com/goodwithtech/dockle/releases/download/v0.4.10/dockle_0.4.10_Linux-64bit.deb
+          sudo dpkg -i dockle.deb
+          
+          dockle --format json --output dockle-app-report.json hp-analysis-app:latest || true
+          dockle --format json --output dockle-ai-engine-report.json hp-analysis-ai-engine:latest || true
+      
+      - name: Upload Dockle Reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: dockle-reports
+          path: dockle-*-report.json
+
+  # Infrastructure Security Scan
+  infrastructure-scan:
+    runs-on: ubuntu-latest
+    name: Infrastructure Security Scan
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.0
+      
+      - name: Terraform Format Check
+        run: |
+          cd terraform
+          terraform fmt -check -recursive
+      
+      - name: Run Checkov
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: terraform/
+          framework: terraform
+          output_format: sarif
+          output_file_path: checkov-results.sarif
+          download_external_modules: true
+          quiet: true
+      
+      - name: Upload Checkov Results
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: checkov-results.sarif
+      
+      - name: Run TFSec
+        uses: aquasecurity/tfsec-action@v1.0.0
+        with:
+          working_directory: terraform/
+          format: sarif
+          sarif_file: tfsec-results.sarif
+      
+      - name: Upload TFSec Results
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: tfsec-results.sarif
+      
+      - name: Run Terrascan
+        uses: tenable/terrascan-action@main
+        with:
+          iac_type: 'terraform'
+          iac_dir: 'terraform/'
+          policy_type: 'aws'
+          only_warn: true
+          sarif_upload: true
+
+  # Secrets Scanning
+  secrets-scan:
+    runs-on: ubuntu-latest
+    name: Secrets Detection
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Run GitLeaks
+        uses: zricethezav/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Run TruffleHog
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: main
+          head: HEAD
+          extra_args: --debug --only-verified
+
+  # License Compliance Check
+  license-scan:
+    runs-on: ubuntu-latest
+    name: License Compliance
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+      
+      - name: Install Dependencies
+        run: npm ci
+      
+      - name: Check License Compatibility
+        run: |
+          npx license-checker --json --out license-report.json
+          npx license-checker --summary
+      
+      - name: Upload License Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: license-report
+          path: license-report.json
+
+  # Security Summary Report
+  security-report:
+    runs-on: ubuntu-latest
+    name: Security Report Summary
+    needs: [sast-scan, sca-scan, container-scan, infrastructure-scan, secrets-scan, license-scan]
+    if: always()
+    
+    steps:
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v3
+      
+      - name: Generate Security Summary
+        run: |
+          echo "# Security Scan Summary" > security-summary.md
+          echo "## Scan Results" >> security-summary.md
+          echo "- SAST Scan: ${{ needs.sast-scan.result }}" >> security-summary.md
+          echo "- SCA Scan: ${{ needs.sca-scan.result }}" >> security-summary.md
+          echo "- Container Scan: ${{ needs.container-scan.result }}" >> security-summary.md
+          echo "- Infrastructure Scan: ${{ needs.infrastructure-scan.result }}" >> security-summary.md
+          echo "- Secrets Scan: ${{ needs.secrets-scan.result }}" >> security-summary.md
+          echo "- License Scan: ${{ needs.license-scan.result }}" >> security-summary.md
+          echo "" >> security-summary.md
+          echo "## Recommendations" >> security-summary.md
+          echo "1. Review all HIGH and CRITICAL vulnerabilities" >> security-summary.md
+          echo "2. Update dependencies with known vulnerabilities" >> security-summary.md
+          echo "3. Address infrastructure security misconfigurations" >> security-summary.md
+          echo "4. Ensure no secrets are committed to the repository" >> security-summary.md
+          echo "5. Verify license compliance for all dependencies" >> security-summary.md
+      
+      - name: Upload Security Summary
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-summary
+          path: security-summary.md
+      
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const summary = fs.readFileSync('security-summary.md', 'utf8');
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: summary
+            });
+      
+      - name: Notify Security Team
+        if: failure()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: failure
+          custom_payload: |
+            {
+              text: "Security scan failed for HP Analysis System",
+              attachments: [{
+                color: "danger",
+                fields: [{
+                  title: "Repository",
+                  value: "${{ github.repository }}",
+                  short: true
+                }, {
+                  title: "Branch",
+                  value: "${{ github.ref_name }}",
+                  short: true
+                }, {
+                  title: "Commit",
+                  value: "${{ github.sha }}",
+                  short: true
+                }, {
+                  title: "Actor",
+                  value: "${{ github.actor }}",
+                  short: true
+                }],
+                actions: [{
+                  type: "button",
+                  text: "View Security Results",
+                  url: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                }]
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SECURITY_SLACK_WEBHOOK }}

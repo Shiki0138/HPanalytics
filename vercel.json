@@ -1,0 +1,98 @@
+{
+  "version": 2,
+  "name": "hp-analytics-system",
+  "public": true,
+  "builds": [],
+  "routes": [
+    {
+      "src": "/",
+      "dest": "/public/index-simple.html"
+    },
+    {
+      "src": "/ec",
+      "dest": "/public/simple-analytics.html"
+    },
+    {
+      "src": "/corporate",
+      "dest": "/public/corporate-analytics.html"
+    },
+    {
+      "src": "/dashboard",
+      "dest": "/public/production-dashboard.html"
+    },
+    {
+      "src": "/install",
+      "dest": "/public/production-install.html"
+    },
+    {
+      "src": "/tracking-tag.js",
+      "dest": "/public/tracking-tag-production.js",
+      "headers": {
+        "Content-Type": "application/javascript",
+        "Cache-Control": "public, max-age=31536000, immutable"
+      }
+    },
+    {
+      "src": "/analytics-viewer",
+      "dest": "/public/analytics-viewer.html"
+    },
+    {
+      "src": "/public/(.*)",
+      "dest": "/public/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/public/$1"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=31536000; includeSubDomains"
+        }
+      ]
+    },
+    {
+      "source": "/tracking-tag.js",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/javascript"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        },
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET"
+        }
+      ]
+    }
+  ],
+  "cleanUrls": true,
+  "trailingSlash": false
+}

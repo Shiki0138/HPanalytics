@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Analytics Tracking Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .demo-section {
+            background: white;
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .button {
+            background: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            transition: background-color 0.2s;
+        }
+        
+        .button:hover {
+            background: #0056b3;
+        }
+        
+        .button.secondary {
+            background: #6c757d;
+        }
+        
+        .button.secondary:hover {
+            background: #545b62;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        .input-group input, .input-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .status {
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        
+        .status.info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .event-log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+        
+        .event-item {
+            margin-bottom: 10px;
+            padding: 8px;
+            background: white;
+            border-left: 3px solid #007bff;
+            border-radius: 3px;
+        }
+        
+        .event-type {
+            font-weight: bold;
+            color: #007bff;
+        }
+        
+        .event-timestamp {
+            color: #6c757d;
+            font-size: 11px;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>AI Analytics Tracking Demo</h1>
+        <p>世界トップレベルの性能を誇るJavaScriptトラッキングタグのデモンストレーション</p>
+    </div>
+
+    <div id="status" class="status info">
+        トラッキングを初期化中...
+    </div>
+
+    <div class="grid">
+        <div class="demo-section">
+            <h2>トラッカー制御</h2>
+            <button class="button" onclick="initializeTracker()">トラッカー初期化</button>
+            <button class="button secondary" onclick="resetTracker()">リセット</button>
+            <button class="button secondary" onclick="flushEvents()">イベント送信</button>
+            
+            <div class="input-group" style="margin-top: 20px;">
+                <label>プロジェクトID:</label>
+                <input type="text" id="projectId" value="demo-project" />
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>イベントトラッキング</h2>
+            <button class="button" onclick="trackPageView()">ページビュー</button>
+            <button class="button" onclick="trackCustomEvent()">カスタムイベント</button>
+            <button class="button" onclick="triggerError()">テストエラー</button>
+            
+            <div class="input-group" style="margin-top: 20px;">
+                <label>カスタムイベント名:</label>
+                <input type="text" id="customEventName" value="button_click" />
+            </div>
+            
+            <div class="input-group">
+                <label>イベントプロパティ (JSON):</label>
+                <textarea id="customEventProps" rows="3">{"page": "demo", "section": "header"}</textarea>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>ユーザー管理</h2>
+            <button class="button" onclick="identifyUser()">ユーザー識別</button>
+            <button class="button" onclick="setUserProperties()">ユーザープロパティ設定</button>
+            
+            <div class="input-group" style="margin-top: 20px;">
+                <label>ユーザーID:</label>
+                <input type="text" id="userId" value="demo-user-123" />
+            </div>
+            
+            <div class="input-group">
+                <label>ユーザープロパティ (JSON):</label>
+                <textarea id="userProps" rows="3">{"name": "Demo User", "plan": "premium", "signupDate": "2024-01-01"}</textarea>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>パフォーマンステスト</h2>
+            <button class="button" onclick="performanceTest()">大量イベント送信</button>
+            <button class="button" onclick="webVitalsTest()">Web Vitals収集</button>
+            <button class="button secondary" onclick="clearLog()">ログクリア</button>
+            
+            <div style="margin-top: 15px;">
+                <strong>セッションID:</strong> <span id="sessionId">未初期化</span><br>
+                <strong>現在のユーザー:</strong> <span id="currentUser">匿名</span><br>
+                <strong>イベント数:</strong> <span id="eventCount">0</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="demo-section">
+        <h2>リアルタイムイベントログ</h2>
+        <div id="eventLog" class="event-log">
+            イベントログがここに表示されます...
+        </div>
+    </div>
+
+    <script>
+        // グローバル変数
+        let eventCount = 0;
+        let isInitialized = false;
+
+        // ステータス更新関数
+        function updateStatus(message, type = 'info') {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+        }
+
+        // ログ追加関数
+        function addToLog(type, message, data = null) {
+            const logEl = document.getElementById('eventLog');
+            const eventItem = document.createElement('div');
+            eventItem.className = 'event-item';
+            
+            const timestamp = new Date().toLocaleTimeString();
+            let logContent = `<div class="event-type">${type}</div>`;
+            logContent += `<div class="event-timestamp">${timestamp}</div>`;
+            logContent += `<div>${message}</div>`;
+            
+            if (data) {
+                logContent += `<pre style="margin: 5px 0; font-size: 11px; color: #666;">${JSON.stringify(data, null, 2)}</pre>`;
+            }
+            
+            eventItem.innerHTML = logContent;
+            logEl.appendChild(eventItem);
+            logEl.scrollTop = logEl.scrollHeight;
+            
+            eventCount++;
+            document.getElementById('eventCount').textContent = eventCount;
+        }
+
+        // トラッカー初期化
+        function initializeTracker() {
+            const projectId = document.getElementById('projectId').value;
+            
+            if (window.aiAnalytics) {
+                const config = {
+                    projectId: projectId,
+                    endpoint: '/api/collect',
+                    debug: true,
+                    sampleRate: 1.0,
+                    webVitals: true,
+                    errorTracking: true,
+                    batchSize: 5,
+                    flushInterval: 3000
+                };
+
+                if (Array.isArray(window.aiAnalytics)) {
+                    window.aiAnalytics.push(['init', config]);
+                } else {
+                    window.aiAnalytics.init(config);
+                }
+
+                isInitialized = true;
+                updateStatus('トラッカーが正常に初期化されました', 'success');
+                addToLog('INIT', 'トラッカー初期化', config);
+                
+                // セッションID更新
+                setTimeout(() => {
+                    if (window.aiAnalytics && window.aiAnalytics.getSessionId) {
+                        document.getElementById('sessionId').textContent = window.aiAnalytics.getSessionId();
+                    }
+                }, 100);
+            }
+        }
+
+        // トラッカーリセット
+        function resetTracker() {
+            if (window.aiAnalytics && window.aiAnalytics.reset) {
+                window.aiAnalytics.reset();
+                isInitialized = false;
+                document.getElementById('sessionId').textContent = '未初期化';
+                document.getElementById('currentUser').textContent = '匿名';
+                updateStatus('トラッカーがリセットされました', 'info');
+                addToLog('RESET', 'トラッカーリセット');
+            }
+        }
+
+        // イベント送信
+        function flushEvents() {
+            if (window.aiAnalytics && window.aiAnalytics.flush) {
+                window.aiAnalytics.flush().then(() => {
+                    updateStatus('イベントが正常に送信されました', 'success');
+                    addToLog('FLUSH', 'イベント送信完了');
+                }).catch((error) => {
+                    updateStatus('イベント送信でエラーが発生しました: ' + error, 'error');
+                    addToLog('ERROR', 'イベント送信エラー', { error: error.toString() });
+                });
+            }
+        }
+
+        // ページビュートラッキング
+        function trackPageView() {
+            if (window.aiAnalytics && window.aiAnalytics.page) {
+                window.aiAnalytics.page('/demo', 'トラッキングデモページ', {
+                    section: 'demo',
+                    version: '1.0.0'
+                });
+                addToLog('PAGE_VIEW', 'ページビュー', { url: '/demo', title: 'トラッキングデモページ' });
+                updateStatus('ページビューイベントを送信しました', 'success');
+            }
+        }
+
+        // カスタムイベントトラッキング
+        function trackCustomEvent() {
+            const eventName = document.getElementById('customEventName').value;
+            const propsText = document.getElementById('customEventProps').value;
+            
+            try {
+                const properties = JSON.parse(propsText);
+                
+                if (window.aiAnalytics && window.aiAnalytics.track) {
+                    window.aiAnalytics.track(eventName, properties);
+                    addToLog('CUSTOM_EVENT', `カスタムイベント: ${eventName}`, properties);
+                    updateStatus('カスタムイベントを送信しました', 'success');
+                }
+            } catch (error) {
+                updateStatus('プロパティのJSON形式が不正です: ' + error, 'error');
+                addToLog('ERROR', 'JSON解析エラー', { error: error.toString() });
+            }
+        }
+
+        // ユーザー識別
+        function identifyUser() {
+            const userId = document.getElementById('userId').value;
+            const propsText = document.getElementById('userProps').value;
+            
+            try {
+                const properties = JSON.parse(propsText);
+                
+                if (window.aiAnalytics && window.aiAnalytics.identify) {
+                    window.aiAnalytics.identify(userId, properties);
+                    document.getElementById('currentUser').textContent = userId;
+                    addToLog('IDENTIFY', `ユーザー識別: ${userId}`, properties);
+                    updateStatus('ユーザーを識別しました', 'success');
+                }
+            } catch (error) {
+                updateStatus('ユーザープロパティのJSON形式が不正です: ' + error, 'error');
+                addToLog('ERROR', 'JSON解析エラー', { error: error.toString() });
+            }
+        }
+
+        // ユーザープロパティ設定
+        function setUserProperties() {
+            const propsText = document.getElementById('userProps').value;
+            
+            try {
+                const properties = JSON.parse(propsText);
+                
+                if (window.aiAnalytics && window.aiAnalytics.setUserProperties) {
+                    window.aiAnalytics.setUserProperties(properties);
+                    addToLog('USER_PROPS', 'ユーザープロパティ設定', properties);
+                    updateStatus('ユーザープロパティを設定しました', 'success');
+                }
+            } catch (error) {
+                updateStatus('ユーザープロパティのJSON形式が不正です: ' + error, 'error');
+                addToLog('ERROR', 'JSON解析エラー', { error: error.toString() });
+            }
+        }
+
+        // テストエラー
+        function triggerError() {
+            try {
+                throw new Error('デモ用のテストエラーです');
+            } catch (error) {
+                addToLog('ERROR', 'テストエラー発生', { message: error.message });
+                updateStatus('テストエラーが発生しました', 'error');
+            }
+        }
+
+        // パフォーマンステスト
+        function performanceTest() {
+            const startTime = performance.now();
+            
+            for (let i = 0; i < 50; i++) {
+                if (window.aiAnalytics && window.aiAnalytics.track) {
+                    window.aiAnalytics.track('performance_test_event', {
+                        iteration: i,
+                        timestamp: Date.now(),
+                        randomValue: Math.random()
+                    });
+                }
+            }
+            
+            const endTime = performance.now();
+            const duration = endTime - startTime;
+            
+            addToLog('PERFORMANCE', `パフォーマンステスト完了: 50イベント、${duration.toFixed(2)}ms`);
+            updateStatus(`パフォーマンステスト完了: ${duration.toFixed(2)}ms`, 'success');
+        }
+
+        // Web Vitalsテスト
+        function webVitalsTest() {
+            // Web Vitals情報を手動で収集
+            if ('performance' in window) {
+                const navigation = performance.getEntriesByType('navigation')[0];
+                const paint = performance.getEntriesByType('paint');
+                
+                addToLog('WEB_VITALS', 'Web Vitals情報', {
+                    navigation: navigation ? {
+                        domContentLoaded: navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart,
+                        loadComplete: navigation.loadEventEnd - navigation.loadEventStart
+                    } : 'N/A',
+                    paint: paint.map(entry => ({
+                        name: entry.name,
+                        startTime: entry.startTime
+                    }))
+                });
+                
+                updateStatus('Web Vitals情報を収集しました', 'success');
+            } else {
+                updateStatus('このブラウザではWeb Vitalsをサポートしていません', 'error');
+            }
+        }
+
+        // ログクリア
+        function clearLog() {
+            document.getElementById('eventLog').innerHTML = 'イベントログがここに表示されます...';
+            eventCount = 0;
+            document.getElementById('eventCount').textContent = '0';
+            updateStatus('ログをクリアしました', 'info');
+        }
+
+        // 初期化処理
+        window.addEventListener('load', function() {
+            addToLog('SYSTEM', 'デモページ読み込み完了');
+            
+            // トラッキングスクリプトの読み込み
+            const script = document.createElement('script');
+            script.src = '/tracking-tag/index.js';
+            script.async = true;
+            
+            script.onload = function() {
+                addToLog('SYSTEM', 'トラッキングスクリプト読み込み完了');
+                updateStatus('トラッキングスクリプトが読み込まれました。初期化ボタンをクリックしてください。', 'info');
+            };
+            
+            script.onerror = function() {
+                updateStatus('トラッキングスクリプトの読み込みに失敗しました', 'error');
+                addToLog('ERROR', 'スクリプト読み込み失敗');
+            };
+            
+            document.head.appendChild(script);
+        });
+
+        // コンソール出力をキャプチャ
+        const originalConsoleLog = console.log;
+        console.log = function(...args) {
+            if (args[0] && typeof args[0] === 'string' && args[0].includes('AI Analytics:')) {
+                addToLog('DEBUG', args.join(' '));
+            }
+            originalConsoleLog.apply(console, args);
+        };
+    </script>
+</body>
+</html>

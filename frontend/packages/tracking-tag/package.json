@@ -1,0 +1,56 @@
+{
+  "name": "@ai-analytics/tracking-tag",
+  "version": "1.0.0",
+  "description": "High-performance JavaScript tracking tag for AI Web Analytics",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "types/index.d.ts",
+  "files": [
+    "dist",
+    "types"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "build:dev": "rollup -c --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "size": "size-limit",
+    "analyze": "rollup -c --environment ANALYZE",
+    "clean": "rm -rf dist types"
+  },
+  "keywords": [
+    "analytics",
+    "tracking",
+    "javascript",
+    "performance",
+    "web-vitals"
+  ],
+  "author": "AI Analytics Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^15.3.1",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "@size-limit/preset-small-lib": "^11.2.0",
+    "@types/jest": "^29.5.14",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "rollup": "^4.46.4",
+    "rollup-plugin-analyzer": "^4.0.0",
+    "size-limit": "^11.2.0",
+    "typescript": "^5.9.2"
+  },
+  "size-limit": [
+    {
+      "path": "dist/index.js",
+      "limit": "10 KB",
+      "gzip": true
+    }
+  ],
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead",
+    "not IE 11"
+  ]
+}

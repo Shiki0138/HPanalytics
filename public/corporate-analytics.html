@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>企業サイト改善分析システム</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap');
+        body { 
+            font-family: 'Noto Sans JP', sans-serif; 
+            background: #f8f9fa;
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+        }
+        .priority-high { border-left: 4px solid #ef4444; }
+        .priority-medium { border-left: 4px solid #f59e0b; }
+        .priority-low { border-left: 4px solid #3b82f6; }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .pulse-dot {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+    </style>
+</head>
+<body>
+    <!-- シンプルなヘッダー -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-6xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                        <span class="text-white text-xl">🏢</span>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-bold text-gray-900">企業サイト改善分析システム</h1>
+                        <p class="text-xs text-gray-600">問題を見つけて、成果を最大化</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <div class="w-2 h-2 bg-green-500 rounded-full pulse-dot"></div>
+                    <span class="text-sm text-gray-600">リアルタイム分析中</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main class="max-w-6xl mx-auto px-6 py-8">
+        
+        <!-- 現在の状態サマリー（企業サイト向け） -->
+        <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">今月のお問い合わせ: 47件</h2>
+                    <p class="text-gray-600 mt-1">前月比 <span class="text-red-600 font-semibold">-23%</span> | 目標達成率 <span class="text-orange-600 font-semibold">62%</span></p>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm text-gray-600">改善可能な成果</p>
+                    <p class="text-3xl font-bold text-purple-600">+38件/月</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 重要な問題点のみを表示（企業サイト版） -->
+        <div class="mb-8">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <span class="text-red-500 mr-2">⚠️</span>
+                今すぐ対応が必要な問題点
+            </h3>
+            
+            <div class="space-y-4">
+                <!-- 問題点1: 高優先度 -->
+                <div class="bg-white rounded-lg shadow-sm p-6 priority-high card-hover fade-in" onclick="showProblemDetail('contact-form')">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-3 mb-2">
+                                <span class="bg-red-100 text-red-800 text-xs font-semibold px-2 py-1 rounded">緊急</span>
+                                <h4 class="text-lg font-semibold text-gray-900">お問い合わせフォームの離脱率が異常</h4>
+                            </div>
+                            <p class="text-gray-600 mb-3">
+                                フォーム到達者の<strong>72%が入力途中で離脱</strong>しています。
+                                業界平均（40%）を大幅に上回り、多くの商談機会を逃しています。
+                            </p>
+                            <div class="flex items-center justify-between">
+                                <p class="text-sm text-red-600 font-medium">
+                                    推定損失: 月間28件の問い合わせ
+                                </p>
+                                <button class="text-blue-600 text-sm font-medium hover:underline flex items-center">
+                                    詳細を見る
+                                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 問題点2: 中優先度 -->
+                <div class="bg-white rounded-lg shadow-sm p-6 priority-medium card-hover fade-in" style="animation-delay: 0.1s" onclick="showProblemDetail('navigation')">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-3 mb-2">
+                                <span class="bg-orange-100 text-orange-800 text-xs font-semibold px-2 py-1 rounded">重要</span>
+                                <h4 class="text-lg font-semibold text-gray-900">重要ページへの到達率が低い</h4>
+                            </div>
+                            <p class="text-gray-600 mb-3">
+                                「サービス詳細」や「導入事例」ページへの到達率が<strong>わずか12%</strong>。
+                                ナビゲーション設計の問題で、価値を伝えきれていません。
+                            </p>
+                            <div class="flex items-center justify-between">
+                                <p class="text-sm text-orange-600 font-medium">
+                                    機会損失: 月間15件の問い合わせ
+                                </p>
+                                <button class="text-blue-600 text-sm font-medium hover:underline flex items-center">
+                                    詳細を見る
+                                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 問題点3: 低優先度 -->
+                <div class="bg-white rounded-lg shadow-sm p-6 priority-low card-hover fade-in" style="animation-delay: 0.2s" onclick="showProblemDetail('mobile-usability')">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-3 mb-2">
+                                <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-1 rounded">改善推奨</span>
+                                <h4 class="text-lg font-semibold text-gray-900">モバイルでの資料ダウンロード困難</h4>
+                            </div>
+                            <p class="text-gray-600 mb-3">
+                                モバイルユーザーの<strong>65%が資料ダウンロードを断念</strong>。
+                                ボタンが小さく、フォーム入力も困難な状態です。
+                            </p>
+                            <div class="flex items-center justify-between">
+                                <p class="text-sm text-blue-600 font-medium">
+                                    改善可能: 月間10件の新規リード
+                                </p>
+                                <button class="text-blue-600 text-sm font-medium hover:underline flex items-center">
+                                    詳細を見る
+                                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- クイックアクション（企業サイト版） -->
+        <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">🚀 今すぐできる改善アクション</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <button class="bg-white rounded-lg p-4 text-left hover:shadow-md transition-shadow" onclick="executeQuickFix('form')">
+                    <div class="text-green-600 text-2xl mb-2">📝</div>
+                    <h4 class="font-medium text-gray-900">フォーム簡略化</h4>
+                    <p class="text-sm text-gray-600 mt-1">必須項目を削減し、離脱を防止</p>
+                    <p class="text-xs text-green-600 mt-2 font-medium">期待効果: +15件/月</p>
+                </button>
+                
+                <button class="bg-white rounded-lg p-4 text-left hover:shadow-md transition-shadow" onclick="executeQuickFix('navigation')">
+                    <div class="text-blue-600 text-2xl mb-2">🧭</div>
+                    <h4 class="font-medium text-gray-900">導線改善</h4>
+                    <p class="text-sm text-gray-600 mt-1">重要ページへのCTAを最適配置</p>
+                    <p class="text-xs text-blue-600 mt-2 font-medium">期待効果: +12件/月</p>
+                </button>
+                
+                <button class="bg-white rounded-lg p-4 text-left hover:shadow-md transition-shadow" onclick="executeQuickFix('mobile')">
+                    <div class="text-purple-600 text-2xl mb-2">📱</div>
+                    <h4 class="font-medium text-gray-900">モバイル最適化</h4>
+                    <p class="text-sm text-gray-600 mt-1">タップしやすいUIに自動調整</p>
+                    <p class="text-xs text-purple-600 mt-2 font-medium">期待効果: +8件/月</p>
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- 詳細モーダル（非表示） -->
+    <div id="detailModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50" onclick="closeModal()">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+                <div id="modalContent" class="p-8">
+                    <!-- 動的にコンテンツを挿入 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 企業サイト向けの問題詳細データ
+        const problemDetails = {
+            'contact-form': {
+                title: 'お問い合わせフォームの詳細分析',
+                icon: '📝',
+                severity: 'high',
+                content: `
+                    <div class="mb-6">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-4">お問い合わせフォームの離脱分析</h3>
+                        
+                        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                            <p class="text-red-800">
+                                <strong>緊急度: 最高</strong> - 毎月28件の潜在的な商談を失っています
+                            </p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div>
+                                <h4 class="font-semibold text-gray-900 mb-3">📊 離脱の主な原因</h4>
+                                <ul class="space-y-2">
+                                    <li class="flex items-start">
+                                        <span class="text-red-500 mr-2">•</span>
+                                        <div>
+                                            <strong>必須項目が多すぎる（42%）</strong>
+                                            <p class="text-sm text-gray-600">全15項目中12項目が必須</p>
+                                        </div>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-red-500 mr-2">•</span>
+                                        <div>
+                                            <strong>確認画面での離脱（28%）</strong>
+                                            <p class="text-sm text-gray-600">確認→修正→確認のループ</p>
+                                        </div>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-red-500 mr-2">•</span>
+                                        <div>
+                                            <strong>エラーメッセージ不親切（18%）</strong>
+                                            <p class="text-sm text-gray-600">どこが間違っているか不明確</p>
+                                        </div>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-red-500 mr-2">•</span>
+                                        <div>
+                                            <strong>個人情報への不安（12%）</strong>
+                                            <p class="text-sm text-gray-600">プライバシーポリシーが不明確</p>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div>
+                                <h4 class="font-semibold text-gray-900 mb-3">💡 推奨される改善策</h4>
+                                <div class="space-y-3">
+                                    <div class="bg-green-50 border border-green-200 rounded-lg p-3">
+                                        <h5 class="font-medium text-green-800">1. 必須項目の削減</h5>
+                                        <p class="text-sm text-green-700 mt-1">会社名・氏名・メールアドレスの3項目のみに</p>
+                                        <p class="text-xs text-green-600 mt-2">実装時間: 1時間 | 効果: +12件/月</p>
+                                    </div>
+                                    
+                                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                                        <h5 class="font-medium text-blue-800">2. リアルタイムバリデーション</h5>
+                                        <p class="text-sm text-blue-700 mt-1">入力中にエラーを即座に表示</p>
+                                        <p class="text-xs text-blue-600 mt-2">実装時間: 3時間 | 効果: +8件/月</p>
+                                    </div>
+                                    
+                                    <div class="bg-purple-50 border border-purple-200 rounded-lg p-3">
+                                        <h5 class="font-medium text-purple-800">3. 進捗インジケーター追加</h5>
+                                        <p class="text-sm text-purple-700 mt-1">あと何ステップかを明確に表示</p>
+                                        <p class="text-xs text-purple-600 mt-2">実装時間: 2時間 | 効果: +5件/月</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-50 rounded-lg p-6">
+                            <h4 class="font-semibold text-gray-900 mb-3">📈 フォーム最適化による期待効果</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                <div class="bg-white rounded-lg p-4 text-center">
+                                    <div class="text-3xl font-bold text-green-600">25%</div>
+                                    <p class="text-sm text-gray-600 mt-1">離脱率の改善</p>
+                                    <p class="text-xs text-gray-500 mt-1">72% → 47%</p>
+                                </div>
+                                <div class="bg-white rounded-lg p-4 text-center">
+                                    <div class="text-3xl font-bold text-blue-600">+28件</div>
+                                    <p class="text-sm text-gray-600 mt-1">月間問い合わせ増</p>
+                                    <p class="text-xs text-gray-500 mt-1">47件 → 75件</p>
+                                </div>
+                                <div class="bg-white rounded-lg p-4 text-center">
+                                    <div class="text-3xl font-bold text-purple-600">160%</div>
+                                    <p class="text-sm text-gray-600 mt-1">ROI</p>
+                                    <p class="text-xs text-gray-500 mt-1">6時間の作業で大幅改善</p>
+                                </div>
+                            </div>
+                            <button class="w-full bg-green-500 text-white py-3 rounded-lg font-bold hover:bg-green-600 transition-colors">
+                                フォーム改善を今すぐ開始
+                            </button>
+                        </div>
+                    </div>
+                `
+            },
+            'navigation': {
+                title: 'サイト導線の最適化分析',
+                icon: '🧭',
+                severity: 'medium',
+                content: `
+                    <div class="mb-6">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-4">重要ページへの導線分析</h3>
+                        
+                        <div class="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6">
+                            <p class="text-orange-800">
+                                <strong>重要度: 高</strong> - サービスの価値が伝わる前に88%が離脱
+                            </p>
+                        </div>
+
+                        <div class="mb-6">
+                            <h4 class="font-semibold text-gray-900 mb-3">📊 現在のユーザーフロー分析</h4>
+                            <div class="bg-white border border-gray-200 rounded-lg p-4">
+                                <div class="space-y-3">
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-medium">トップページ → サービス詳細</span>
+                                        <span class="text-red-600 font-bold">12%</span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-medium">トップページ → 導入事例</span>
+                                        <span class="text-red-600 font-bold">8%</span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-medium">トップページ → 料金プラン</span>
+                                        <span class="text-orange-600 font-bold">15%</span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-medium">トップページ → 会社概要</span>
+                                        <span class="text-gray-600 font-bold">45%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div>
+                                <h4 class="font-semibold text-gray-900 mb-3">🔍 問題点の詳細</h4>
+                                <ul class="space-y-2">
+                                    <li class="flex items-start">
+                                        <span class="text-orange-500 mr-2">•</span>
+                                        <div>
+                                            <strong>CTAボタンが目立たない</strong>
+                                            <p class="text-sm text-gray-600">グレー背景に白文字で視認性低い</p>
+                                        </div>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-orange-500 mr-2">•</span>
+                                        <div>
+                                            <strong>メニュー構造が複雑</strong>
+                                            <p class="text-sm text-gray-600">3階層のドロップダウンメニュー</p>
+                                        </div>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-orange-500 mr-2">•</span>
+                                        <div>
+                                            <strong>重要情報が下部に配置</strong>
+                                            <p class="text-sm text-gray-600">スクロールしないと見えない</p>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div>
+                                <h4 class="font-semibold text-gray-900 mb-3">✨ 改善提案</h4>
+                                <div class="space-y-3">
+                                    <div class="bg-green-50 border border-green-200 rounded-lg p-3">
+                                        <h5 class="font-medium text-green-800">ヒーローセクションの再設計</h5>
+                                        <p class="text-sm text-green-700 mt-1">価値提案と主要CTAを上部に集約</p>
+                                    </div>
+                                    
+                                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                                        <h5 class="font-medium text-blue-800">スティッキーナビゲーション</h5>
+                                        <p class="text-sm text-blue-700 mt-1">重要ページへのショートカットを常時表示</p>
+                                    </div>
+                                    
+                                    <div class="bg-purple-50 border border-purple-200 rounded-lg p-3">
+                                        <h5 class="font-medium text-purple-800">関連コンテンツの提示</h5>
+                                        <p class="text-sm text-purple-700 mt-1">各ページに次のアクションを明確に提示</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-50 rounded-lg p-6">
+                            <h4 class="font-semibold text-gray-900 mb-3">🎯 実装優先順位</h4>
+                            <p class="text-sm text-gray-600 mb-4">
+                                段階的な改善により、ユーザー体験を着実に向上させます。
+                            </p>
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between p-3 bg-white rounded">
+                                    <span>Phase 1: CTAボタンの改善（1日）</span>
+                                    <span class="text-green-600 font-medium">+5件/月</span>
+                                </div>
+                                <div class="flex items-center justify-between p-3 bg-white rounded">
+                                    <span>Phase 2: トップページ再構成（3日）</span>
+                                    <span class="text-blue-600 font-medium">+8件/月</span>
+                                </div>
+                                <div class="flex items-center justify-between p-3 bg-white rounded">
+                                    <span>Phase 3: 全体導線の最適化（1週間）</span>
+                                    <span class="text-purple-600 font-medium">+12件/月</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            'mobile-usability': {
+                title: 'モバイルユーザビリティの改善',
+                icon: '📱',
+                severity: 'low',
+                content: `
+                    <div class="mb-6">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-4">モバイル体験の最適化分析</h3>
+                        
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                            <p class="text-blue-800">
+                                <strong>改善推奨</strong> - モバイルユーザーの65%が資料ダウンロードを断念
+                            </p>
+                        </div>
+
+                        <div class="mb-6">
+                            <h4 class="font-semibold text-gray-900 mb-3">📱 モバイルユーザーの行動分析</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="bg-white border border-gray-200 rounded-lg p-4">
+                                    <h5 class="font-medium text-gray-800 mb-3">デバイス別訪問者</h5>
+                                    <div class="space-y-2">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm">スマートフォン</span>
+                                            <span class="font-bold">58%</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm">タブレット</span>
+                                            <span class="font-bold">12%</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm">デスクトップ</span>
+                                            <span class="font-bold">30%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-white border border-gray-200 rounded-lg p-4">
+                                    <h5 class="font-medium text-gray-800 mb-3">モバイルでの問題行動</h5>
+                                    <div class="space-y-2">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm">誤タップ率</span>
+                                            <span class="font-bold text-red-600">42%</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm">フォーム完了率</span>
+                                            <span class="font-bold text-orange-600">23%</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm">資料DL成功率</span>
+                                            <span class="font-bold text-red-600">35%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-6">
+                            <h4 class="font-semibold text-gray-900 mb-3">🔍 主な問題点</h4>
+                            <div class="space-y-3">
+                                <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                                    <h5 class="font-medium text-red-800">タップターゲットが小さすぎる</h5>
+                                    <p class="text-sm text-red-700 mt-1">
+                                        ボタンやリンクが44px以下で、指でタップしづらい
+                                    </p>
+                                </div>
+                                
+                                <div class="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                                    <h5 class="font-medium text-orange-800">フォーム入力が困難</h5>
+                                    <p class="text-sm text-orange-700 mt-1">
+                                        入力欄が狭く、適切なキーボードが表示されない
+                                    </p>
+                                </div>
+                                
+                                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                                    <h5 class="font-medium text-yellow-800">PDFビューアーの問題</h5>
+                                    <p class="text-sm text-yellow-700 mt-1">
+                                        資料がPDF形式のみで、モバイルでの閲覧が困難
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-50 rounded-lg p-6">
+                            <h4 class="font-semibold text-gray-900 mb-3">💡 改善ソリューション</h4>
+                            <div class="space-y-3">
+                                <div class="p-4 bg-white rounded-lg">
+                                    <h5 class="font-medium mb-2">1. タップ可能領域の拡大</h5>
+                                    <p class="text-sm text-gray-600">最小48pxのタップターゲットに自動調整</p>
+                                    <p class="text-xs text-green-600 mt-2">実装: CSS調整のみ（30分）</p>
+                                </div>
+                                
+                                <div class="p-4 bg-white rounded-lg">
+                                    <h5 class="font-medium mb-2">2. モバイル専用フォーム</h5>
+                                    <p class="text-sm text-gray-600">段階的な入力画面で負担を軽減</p>
+                                    <p class="text-xs text-blue-600 mt-2">実装: 専用UIの作成（3時間）</p>
+                                </div>
+                                
+                                <div class="p-4 bg-white rounded-lg">
+                                    <h5 class="font-medium mb-2">3. 資料のHTML化</h5>
+                                    <p class="text-sm text-gray-600">PDFをレスポンシブなWebページに変換</p>
+                                    <p class="text-xs text-purple-600 mt-2">実装: コンテンツ移行（5時間）</p>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4 p-4 bg-blue-100 rounded-lg">
+                                <p class="text-sm text-blue-800">
+                                    <strong>総実装時間: 約1日</strong> で、モバイルからの問い合わせを月10件増加させることが可能です。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            }
+        };
+
+        // 問題の詳細を表示
+        function showProblemDetail(problemId) {
+            const detail = problemDetails[problemId];
+            if (!detail) return;
+
+            const modalContent = document.getElementById('modalContent');
+            modalContent.innerHTML = detail.content;
+            
+            document.getElementById('detailModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // モーダルを閉じる
+        function closeModal() {
+            document.getElementById('detailModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // クイックフィックスの実行（企業サイト版）
+        function executeQuickFix(type) {
+            const fixes = {
+                'form': {
+                    title: 'フォーム簡略化の実行',
+                    message: 'お問い合わせフォームを最適化中...\n\n✅ 必須項目を3つに削減\n✅ リアルタイムバリデーション追加\n✅ 進捗インジケーター設置\n\n予想効果: +15件/月の問い合わせ増'
+                },
+                'navigation': {
+                    title: '導線改善の実行',
+                    message: 'サイト導線を最適化中...\n\n✅ CTAボタンを目立つデザインに変更\n✅ 重要ページへのショートカット追加\n✅ パンくずリストを全ページに設置\n\n予想効果: +12件/月の問い合わせ増'
+                },
+                'mobile': {
+                    title: 'モバイル最適化の実行',
+                    message: 'モバイル体験を改善中...\n\n✅ タップ可能領域を48pxに拡大\n✅ モバイル専用フォームを有効化\n✅ 資料をWebフォーマットに変換\n\n予想効果: +8件/月のリード増'
+                }
+            };
+
+            const fix = fixes[type];
+            if (fix && confirm(`${fix.title}\n\n実行してもよろしいですか？`)) {
+                alert(fix.message);
+            }
+        }
+
+        // ESCキーでモーダルを閉じる
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

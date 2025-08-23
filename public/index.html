@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>市場最強売上分析システム</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Noto Sans JP', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .animate-pulse-custom { animation: pulse-custom 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse-custom { 0%, 100% { opacity: 1; } 50% { opacity: .8; } }
+        .hover-scale:hover { transform: scale(1.02); transition: transform 0.2s ease-in-out; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="app">
+        <!-- ローディング画面 -->
+        <div class="min-h-screen bg-gray-50 flex items-center justify-center">
+            <div class="text-center">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                <p class="text-gray-600">システムを初期化中...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // データとUI管理
+        class SalesAnalyticsApp {
+            constructor() {
+                this.data = {
+                    todaySales: 1847520,
+                    monthlySales: 42350000,
+                    conversionRate: 4.8,
+                    targetAchievement: 108,
+                    insights: [
+                        {
+                            type: 'success',
+                            icon: '🚀',
+                            title: '売上成長加速中',
+                            description: '売上が前月比18.5%増加しています。特にプレミアムプランが好調で、この勢いを維持するためのマーケティング強化を推奨します。',
+                            action: 'マーケティング予算20%増額',
+                            impact: '¥500,000'
+                        },
+                        {
+                            type: 'warning',
+                            icon: '⚠️',
+                            title: '在庫不足リスク検知',
+                            description: '人気商品「プレミアムプラン」の在庫が残り20%を切りました。機会損失を防ぐため緊急補充が必要です。',
+                            action: '緊急在庫補充',
+                            impact: '¥200,000'
+                        },
+                        {
+                            type: 'info',
+                            icon: '💡',
+                            title: '新規顧客獲得チャンス',
+                            description: '競合他社のサービス障害により、検索トラフィックが30%増加中。この機会を活用してください。',
+                            action: '広告予算の一時増額',
+                            impact: '¥300,000'
+                        }
+                    ],
+                    actions: [
+                        { title: '価格最適化', description: '需要に基づく動的価格調整', impact: '¥150,000', time: '15分', difficulty: 'easy' },
+                        { title: 'カート離脱防止', description: '限定オファー自動配信', impact: '¥200,000', time: '10分', difficulty: 'easy' },
+                        { title: 'SEO最適化', description: '検索順位向上施策実施', impact: '¥80,000', time: '45分', difficulty: 'medium' }
+                    ],
+                    products: [
+                        { name: 'プレミアムプラン', sales: '¥850,000', growth: '+25%', status: 'hot' },
+                        { name: 'スタンダードプラン', sales: '¥620,000', growth: '+18%', status: 'good' },
+                        { name: 'ベーシックプラン', sales: '¥280,000', growth: '+5%', status: 'stable' }
+                    ],
+                    customers: [
+                        { name: '新規顧客', count: '1,234人', value: '¥15,000', growth: '+32%' },
+                        { name: 'リピート顧客', count: '856人', value: '¥35,000', growth: '+15%' },
+                        { name: 'VIP顧客', count: '97人', value: '¥125,000', growth: '+8%' }
+                    ]
+                };
+            }
+
+            formatCurrency(amount) {
+                return '¥' + amount.toLocaleString('ja-JP');
+            }
+
+            init() {
+                this.render();
+                this.startRealTimeUpdates();
+            }
+
+            render() {
+                const app = document.getElementById('app');
+                app.innerHTML = `
+                    <div class="min-h-screen bg-gray-50">
+                        ${this.renderHeader()}
+                        ${this.renderMainContent()}
+                    </div>
+                `;
+                this.attachEventListeners();
+            }
+
+            renderHeader() {
+                return `
+                    <div class="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 text-white p-6 shadow-lg">
+                        <div class="max-w-7xl mx-auto">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                                        <span class="text-2xl">🚀</span>
+                                    </div>
+                                    <div>
+                                        <h1 class="text-2xl font-bold">市場最強売上分析システム</h1>
+                                        <p class="text-sm opacity-90 mt-1">AI駆動の売上最大化プラットフォーム</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-4">
+                                    <div class="text-center">
+                                        <div class="text-xs opacity-75">リアルタイム更新</div>
+                                        <div class="flex items-center space-x-1">
+                                            <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                                            <span class="text-sm font-medium">オンライン</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderMainContent() {
+                return `
+                    <main class="max-w-7xl mx-auto p-6">
+                        ${this.renderAIAlert()}
+                        ${this.renderKPIDashboard()}
+                        ${this.renderMainSections()}
+                        ${this.renderDetailedAnalysis()}
+                        ${this.renderFooter()}
+                    </main>
+                `;
+            }
+
+            renderAIAlert() {
+                return `
+                    <div class="mb-6 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-lg p-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="text-2xl animate-bounce">🤖</div>
+                            <div class="flex-1">
+                                <h3 class="font-semibold text-amber-800">AI分析完了</h3>
+                                <p class="text-sm text-amber-700 mt-1">
+                                    売上が前日比+18.5%で好調推移中。プレミアムプランの需要が急増しています。
+                                    マーケティング予算の20%増額で更なる成長が期待できます。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderKPIDashboard() {
+                return `
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        ${this.renderKPICard('今日の売上', this.formatCurrency(this.data.todaySales), '+18.5%', 'positive', '📈', '前日比')}
+                        ${this.renderKPICard('今月の売上', this.formatCurrency(this.data.monthlySales), '+12.3%', 'positive', '💰', '前月比')}
+                        ${this.renderKPICard('コンバージョン率', this.data.conversionRate + '%', '+0.6pt', 'positive', '🎯', '前週比')}
+                        ${this.renderKPICard('予測達成率', this.data.targetAchievement + '%', '+8%', 'positive', '🏆', '目標比')}
+                    </div>
+                `;
+            }
+
+            renderKPICard(title, value, change, changeType, icon, subtitle) {
+                const changeColor = changeType === 'positive' ? 'text-green-600 bg-green-50' : 
+                                   changeType === 'negative' ? 'text-red-600 bg-red-50' : 'text-gray-600 bg-gray-50';
+                
+                return `
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow hover-scale">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="text-2xl">${icon}</div>
+                            <div class="px-2 py-1 rounded-full text-xs font-medium ${changeColor}">
+                                ${change}
+                            </div>
+                        </div>
+                        <h3 class="text-sm font-medium text-gray-600 mb-1">${title}</h3>
+                        <p class="text-2xl font-bold text-gray-900 mb-1">${value}</p>
+                        <p class="text-xs text-gray-500">${subtitle}</p>
+                    </div>
+                `;
+            }
+
+            renderMainSections() {
+                return `
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                        <div class="lg:col-span-2">
+                            ${this.renderAIInsights()}
+                        </div>
+                        <div class="lg:col-span-1">
+                            ${this.renderActions()}
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderAIInsights() {
+                return `
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-6 flex items-center space-x-2">
+                            <span class="text-2xl">🧠</span>
+                            <span>AI分析インサイト</span>
+                        </h2>
+                        <div class="space-y-4">
+                            ${this.data.insights.map(insight => this.renderInsightCard(insight)).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderInsightCard(insight) {
+                const typeConfig = {
+                    success: { bg: 'bg-green-50', border: 'border-green-200', iconColor: 'text-green-600' },
+                    warning: { bg: 'bg-amber-50', border: 'border-amber-200', iconColor: 'text-amber-600' },
+                    info: { bg: 'bg-blue-50', border: 'border-blue-200', iconColor: 'text-blue-600' }
+                }[insight.type];
+
+                return `
+                    <div class="${typeConfig.bg} ${typeConfig.border} border rounded-lg p-4">
+                        <div class="flex items-start space-x-3">
+                            <div class="text-xl">${insight.icon}</div>
+                            <div class="flex-1">
+                                <h4 class="font-semibold mb-2 ${typeConfig.iconColor}">${insight.title}</h4>
+                                <p class="text-sm text-gray-700 mb-3">${insight.description}</p>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-medium text-gray-600">推奨: ${insight.action}</span>
+                                    <span class="text-xs font-bold text-gray-800">影響額: ${insight.impact}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderActions() {
+                return `
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-6 flex items-center space-x-2">
+                            <span class="text-2xl">⚡</span>
+                            <span>今すぐ実行</span>
+                        </h2>
+                        <div class="space-y-4">
+                            ${this.data.actions.map((action, index) => this.renderActionCard(action, index)).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderActionCard(action, index) {
+                const difficultyColor = {
+                    easy: 'text-green-600 bg-green-50',
+                    medium: 'text-yellow-600 bg-yellow-50',
+                    hard: 'text-red-600 bg-red-50'
+                }[action.difficulty];
+
+                return `
+                    <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                        <div class="flex justify-between items-start mb-3">
+                            <h4 class="font-medium text-gray-800">${action.title}</h4>
+                            <span class="text-xs px-2 py-1 rounded ${difficultyColor}">
+                                ${action.difficulty}
+                            </span>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-3">${action.description}</p>
+                        <div class="flex justify-between items-center text-xs text-gray-500 mb-3">
+                            <span>効果: ${action.impact}</span>
+                            <span>時間: ${action.time}</span>
+                        </div>
+                        <button class="w-full bg-blue-500 text-white text-sm py-2 rounded hover:bg-blue-600 transition-colors" 
+                                onclick="app.executeAction(${index})">
+                            実行
+                        </button>
+                    </div>
+                `;
+            }
+
+            renderDetailedAnalysis() {
+                return `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
+                                <span class="text-xl">🏆</span>
+                                <span>トップパフォーマンス商品</span>
+                            </h3>
+                            <div class="space-y-4">
+                                ${this.data.products.map(product => this.renderProductCard(product)).join('')}
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
+                                <span class="text-xl">👥</span>
+                                <span>顧客セグメント分析</span>
+                            </h3>
+                            <div class="space-y-4">
+                                ${this.data.customers.map(customer => this.renderCustomerCard(customer)).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderProductCard(product) {
+                const statusConfig = {
+                    hot: { bg: 'bg-red-50', text: 'text-red-600', icon: '🔥' },
+                    good: { bg: 'bg-green-50', text: 'text-green-600', icon: '📈' },
+                    stable: { bg: 'bg-blue-50', text: 'text-blue-600', icon: '📊' }
+                }[product.status];
+
+                return `
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 rounded-full ${statusConfig.bg} flex items-center justify-center">
+                                <span class="text-sm">${statusConfig.icon}</span>
+                            </div>
+                            <span class="font-medium text-gray-800">${product.name}</span>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-bold text-gray-900">${product.sales}</div>
+                            <div class="${statusConfig.text} text-sm">${product.growth}</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderCustomerCard(customer) {
+                return `
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div>
+                            <div class="font-medium text-gray-800">${customer.name}</div>
+                            <div class="text-sm text-gray-600">${customer.count}</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-bold text-gray-900">${customer.value}</div>
+                            <div class="text-sm text-green-600">${customer.growth}</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderFooter() {
+                return `
+                    <div class="mt-12 text-center py-8 border-t border-gray-200">
+                        <p class="text-gray-500 text-sm">🚀 Market-Leading Sales Analytics System</p>
+                        <p class="text-gray-400 text-xs mt-1">
+                            AI-powered sales maximization platform | Last updated: ${new Date().toLocaleString('ja-JP')}
+                        </p>
+                    </div>
+                `;
+            }
+
+            executeAction(index) {
+                const action = this.data.actions[index];
+                alert(`アクション「${action.title}」を実行しています。\n効果: ${action.impact}\n実行時間: ${action.time}`);
+                
+                // 実行後の効果をシミュレート
+                setTimeout(() => {
+                    alert(`✅ アクション完了！\n「${action.title}」の実行が完了しました。\n売上への影響を監視中...`);
+                }, 2000);
+            }
+
+            attachEventListeners() {
+                // イベントリスナーは既にinlineで設定済み
+            }
+
+            startRealTimeUpdates() {
+                setInterval(() => {
+                    // リアルタイム更新のシミュレーション
+                    const variation = (Math.random() - 0.5) * 10000;
+                    this.data.todaySales += Math.round(variation);
+                    
+                    // UIは必要に応じて更新
+                }, 30000); // 30秒ごと
+            }
+        }
+
+        // アプリケーション初期化
+        const app = new SalesAnalyticsApp();
+        
+        // DOM読み込み完了後に初期化
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => app.init(), 500); // 500ms後に初期化
+        });
+    </script>
+</body>
+</html>

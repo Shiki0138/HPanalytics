@@ -1,0 +1,358 @@
+# Prometheus Alert Rules for HP Analysis System
+groups:
+  - name: hp-analysis.rules
+    rules:
+      # High-level service alerts
+      - alert: ServiceDown
+        expr: up{job=~"hp-analysis-.*"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: "{{ $labels.job }}"
+        annotations:
+          summary: "Service {{ $labels.job }} is down"
+          description: "Service {{ $labels.job }} on instance {{ $labels.instance }} has been down for more than 1 minute"
+
+      - alert: HighErrorRate
+        expr: |
+          (
+            sum(rate(http_requests_total{job=~"hp-analysis-.*",code=~"5.."}[5m])) by (job)
+            /
+            sum(rate(http_requests_total{job=~"hp-analysis-.*"}[5m])) by (job)
+          ) * 100 > 5
+        for: 2m
+        labels:
+          severity: critical
+          service: "{{ $labels.job }}"
+        annotations:
+          summary: "High error rate detected for {{ $labels.job }}"
+          description: "Error rate is {{ $value | humanizePercentage }} for service {{ $labels.job }}"
+
+      - alert: HighLatency
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(http_request_duration_seconds_bucket{job=~"hp-analysis-.*"}[5m])) by (le, job)
+          ) > 2
+        for: 3m
+        labels:
+          severity: warning
+          service: "{{ $labels.job }}"
+        annotations:
+          summary: "High latency detected for {{ $labels.job }}"
+          description: "95th percentile latency is {{ $value }}s for service {{ $labels.job }}"
+
+      # Application-specific alerts
+      - alert: DatabaseConnectionPoolExhausted
+        expr: |
+          (
+            prisma_client_connection_pool_active_connections{job=~"hp-analysis-.*"}
+            /
+            prisma_client_connection_pool_max_connections{job=~"hp-analysis-.*"}
+          ) > 0.9
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Database connection pool almost exhausted"
+          description: "Database connection pool is {{ $value | humanizePercentage }} full on {{ $labels.instance }}"
+
+      - alert: RedisConnectionFailure
+        expr: redis_up{job=~"hp-analysis-.*"} == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis connection failure"
+          description: "Redis connection is down on {{ $labels.instance }}"
+
+      - alert: QueueBacklog
+        expr: |
+          queue_jobs_waiting{job=~"hp-analysis-.*"} > 100
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High queue backlog detected"
+          description: "Queue has {{ $value }} waiting jobs on {{ $labels.instance }}"
+
+      # AI Engine specific alerts
+      - alert: AIModelInferenceFailure
+        expr: |
+          (
+            sum(rate(ai_model_inference_total{status="error"}[5m]))
+            /
+            sum(rate(ai_model_inference_total[5m]))
+          ) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+          service: ai-engine
+        annotations:
+          summary: "High AI model inference failure rate"
+          description: "AI model inference failure rate is {{ $value | humanizePercentage }}"
+
+      - alert: AIModelInferenceLatency
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(ai_model_inference_duration_seconds_bucket[5m])) by (le)
+          ) > 10
+        for: 3m
+        labels:
+          severity: warning
+          service: ai-engine
+        annotations:
+          summary: "High AI model inference latency"
+          description: "95th percentile AI inference latency is {{ $value }}s"
+
+  - name: infrastructure.rules
+    rules:
+      # CPU alerts
+      - alert: HighCPUUsage
+        expr: |
+          (
+            100 - (avg by (instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)
+          ) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is {{ $value | humanize }}% on {{ $labels.instance }}"
+
+      - alert: CriticalCPUUsage
+        expr: |
+          (
+            100 - (avg by (instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)
+          ) > 95
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Critical CPU usage detected"
+          description: "CPU usage is {{ $value | humanize }}% on {{ $labels.instance }}"
+
+      # Memory alerts
+      - alert: HighMemoryUsage
+        expr: |
+          (
+            (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes)
+            /
+            node_memory_MemTotal_bytes
+          ) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is {{ $value | humanize }}% on {{ $labels.instance }}"
+
+      - alert: CriticalMemoryUsage
+        expr: |
+          (
+            (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes)
+            /
+            node_memory_MemTotal_bytes
+          ) * 100 > 95
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Critical memory usage detected"
+          description: "Memory usage is {{ $value | humanize }}% on {{ $labels.instance }}"
+
+      # Disk alerts
+      - alert: HighDiskUsage
+        expr: |
+          (
+            (node_filesystem_size_bytes - node_filesystem_avail_bytes)
+            /
+            node_filesystem_size_bytes
+          ) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High disk usage detected"
+          description: "Disk usage is {{ $value | humanize }}% on {{ $labels.instance }} ({{ $labels.mountpoint }})"
+
+      - alert: CriticalDiskUsage
+        expr: |
+          (
+            (node_filesystem_size_bytes - node_filesystem_avail_bytes)
+            /
+            node_filesystem_size_bytes
+          ) * 100 > 90
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Critical disk usage detected"
+          description: "Disk usage is {{ $value | humanize }}% on {{ $labels.instance }} ({{ $labels.mountpoint }})"
+
+      # Network alerts
+      - alert: HighNetworkErrors
+        expr: |
+          (
+            sum(rate(node_network_receive_errs_total[5m])) by (instance)
+            +
+            sum(rate(node_network_transmit_errs_total[5m])) by (instance)
+          ) > 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High network error rate"
+          description: "Network error rate is {{ $value }} errors/sec on {{ $labels.instance }}"
+
+  - name: database.rules
+    rules:
+      # PostgreSQL alerts
+      - alert: PostgreSQLDown
+        expr: pg_up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "PostgreSQL is down"
+          description: "PostgreSQL database is down on {{ $labels.instance }}"
+
+      - alert: PostgreSQLHighConnections
+        expr: |
+          (
+            pg_stat_database_numbackends
+            /
+            pg_settings_max_connections
+          ) * 100 > 80
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "PostgreSQL high connection usage"
+          description: "PostgreSQL connection usage is {{ $value | humanize }}% on {{ $labels.instance }}"
+
+      - alert: PostgreSQLSlowQueries
+        expr: |
+          pg_stat_activity_max_tx_duration{datname!~"template.*|postgres"} > 300
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "PostgreSQL slow queries detected"
+          description: "Long running query detected ({{ $value }}s) on database {{ $labels.datname }}"
+
+      - alert: PostgreSQLReplicationLag
+        expr: |
+          pg_stat_replication_lag_seconds > 60
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "PostgreSQL replication lag"
+          description: "PostgreSQL replication lag is {{ $value }}s"
+
+  - name: redis.rules
+    rules:
+      # Redis alerts
+      - alert: RedisDown
+        expr: redis_up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis is down"
+          description: "Redis instance is down on {{ $labels.instance }}"
+
+      - alert: RedisHighMemoryUsage
+        expr: |
+          (
+            redis_memory_used_bytes
+            /
+            redis_memory_max_bytes
+          ) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis high memory usage"
+          description: "Redis memory usage is {{ $value | humanize }}% on {{ $labels.instance }}"
+
+      - alert: RedisHighConnections
+        expr: |
+          redis_connected_clients > 100
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis high connections"
+          description: "Redis has {{ $value }} connected clients on {{ $labels.instance }}"
+
+      - alert: RedisKeyEviction
+        expr: |
+          rate(redis_evicted_keys_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis key eviction detected"
+          description: "Redis is evicting {{ $value }} keys/sec on {{ $labels.instance }}"
+
+  - name: aws.rules
+    rules:
+      # ECS alerts
+      - alert: ECSServiceUnhealthy
+        expr: |
+          aws_ecs_service_running_count
+          /
+          aws_ecs_service_desired_count < 0.8
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "ECS service unhealthy"
+          description: "ECS service {{ $labels.service_name }} is running {{ $value | humanizePercentage }} of desired tasks"
+
+      # RDS alerts
+      - alert: RDSHighCPU
+        expr: |
+          aws_rds_cpuutilization_average > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "RDS high CPU usage"
+          description: "RDS instance {{ $labels.db_instance_identifier }} CPU usage is {{ $value }}%"
+
+      - alert: RDSHighConnections
+        expr: |
+          (
+            aws_rds_database_connections_average
+            /
+            aws_rds_database_connections_maximum
+          ) * 100 > 80
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "RDS high connections"
+          description: "RDS instance {{ $labels.db_instance_identifier }} connection usage is {{ $value }}%"
+
+      # ALB alerts
+      - alert: ALBHighLatency
+        expr: |
+          aws_applicationelb_target_response_time_average > 2
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "ALB high latency"
+          description: "ALB {{ $labels.load_balancer }} average response time is {{ $value }}s"
+
+      - alert: ALBHigh5XXErrors
+        expr: |
+          rate(aws_applicationelb_httpcode_target_5xx_count_sum[5m]) > 10
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "ALB high 5XX error rate"
+          description: "ALB {{ $labels.load_balancer }} 5XX error rate is {{ $value }} errors/sec"

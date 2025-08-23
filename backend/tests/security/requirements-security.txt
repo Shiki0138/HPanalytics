@@ -1,0 +1,24 @@
+# Security testing dependencies
+zaproxy==0.0.21
+python-owasp-zap-v2.4==0.0.21
+requests==2.31.0
+python-decouple==3.8
+beautifulsoup4==4.12.2
+lxml==4.9.3
+selenium==4.15.2
+sqlmap==1.7.11
+
+# Additional security tools
+bandit==1.7.5
+safety==2.3.5
+semgrep==1.45.0
+
+# Reporting
+Jinja2==3.1.2
+matplotlib==3.8.2
+reportlab==4.0.7
+
+# Testing utilities
+pytest==7.4.3
+pytest-html==4.1.1
+pytest-json-report==1.5.0

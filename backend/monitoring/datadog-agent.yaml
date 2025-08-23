@@ -1,0 +1,250 @@
+# DataDog Agent Configuration for HP Analysis System
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: datadog-config
+  namespace: monitoring
+data:
+  datadog.yaml: |
+    # DataDog API Configuration
+    api_key: ${DD_API_KEY}
+    site: datadoghq.com
+    
+    # Hostname
+    hostname: hp-analysis-${ENVIRONMENT}
+    
+    # Tags
+    tags:
+      - env:${ENVIRONMENT}
+      - service:hp-analysis-system
+      - version:${APP_VERSION}
+      - team:devops
+    
+    # Logging
+    log_level: info
+    log_file: /var/log/datadog/agent.log
+    
+    # Process Agent
+    process_config:
+      enabled: "true"
+      scrub_args: true
+      custom_sensitive_words: ["password", "token", "key", "secret"]
+    
+    # APM (Application Performance Monitoring)
+    apm_config:
+      enabled: true
+      env: ${ENVIRONMENT}
+      analyzed_rate_by_service:
+        hp-analysis-app|*: 1.0
+        hp-analysis-ai-engine|*: 1.0
+      max_traces_per_second: 10
+    
+    # Container Collection
+    container_collect_all: true
+    container_exclude_logs: []
+    
+    # Kubernetes Integration
+    kubernetes_kubeconfig_path: /host/root/.kube/config
+    
+    # ECS Integration
+    ecs_collect_resource_tags_ec2: true
+    
+    # Custom Metrics
+    dogstatsd_config:
+      dogstatsd_port: 8125
+      non_local_traffic: true
+    
+    # Network Monitoring
+    network_config:
+      enabled: true
+    
+    # Security Monitoring
+    security_agent:
+      enabled: true
+    
+    # Compliance Monitoring
+    compliance_config:
+      enabled: true
+      check_interval: 3600
+
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: datadog-agent
+  namespace: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: datadog-agent
+  template:
+    metadata:
+      labels:
+        app: datadog-agent
+    spec:
+      serviceAccountName: datadog-agent
+      containers:
+      - name: datadog-agent
+        image: datadog/agent:7.45.0
+        env:
+        - name: DD_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: datadog-secret
+              key: api-key
+        - name: DD_SITE
+          value: "datadoghq.com"
+        - name: DD_KUBERNETES_KUBELET_HOST
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        - name: DD_LOGS_ENABLED
+          value: "true"
+        - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
+          value: "true"
+        - name: DD_PROCESS_AGENT_ENABLED
+          value: "true"
+        - name: DD_APM_ENABLED
+          value: "true"
+        - name: DD_APM_NON_LOCAL_TRAFFIC
+          value: "true"
+        - name: ENVIRONMENT
+          value: "production"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        volumeMounts:
+        - name: config
+          mountPath: /etc/datadog-agent/datadog.yaml
+          subPath: datadog.yaml
+        - name: dockersocket
+          mountPath: /var/run/docker.sock
+        - name: procdir
+          mountPath: /host/proc
+          readOnly: true
+        - name: cgroups
+          mountPath: /host/sys/fs/cgroup
+          readOnly: true
+        - name: varlog
+          mountPath: /var/log
+          readOnly: true
+        livenessProbe:
+          exec:
+            command:
+            - agent
+            - health
+          initialDelaySeconds: 15
+          periodSeconds: 15
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+        readinessProbe:
+          exec:
+            command:
+            - agent
+            - health
+          initialDelaySeconds: 15
+          periodSeconds: 15
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+      volumes:
+      - name: config
+        configMap:
+          name: datadog-config
+      - name: dockersocket
+        hostPath:
+          path: /var/run/docker.sock
+      - name: procdir
+        hostPath:
+          path: /proc
+      - name: cgroups
+        hostPath:
+          path: /sys/fs/cgroup
+      - name: varlog
+        hostPath:
+          path: /var/log
+      nodeSelector:
+        kubernetes.io/os: linux
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: datadog-agent
+  namespace: monitoring
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: datadog-agent
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - services
+  - events
+  - endpoints
+  - pods
+  - nodes
+  - componentstatuses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - "quota.openshift.io"
+  resources:
+  - clusterresourcequotas
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - "autoscaling"
+  resources:
+  - horizontalpodautoscalers
+  verbs:
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  resourceNames:
+  - datadogtoken
+  verbs:
+  - get
+  - update
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: datadog-agent
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: datadog-agent
+subjects:
+- kind: ServiceAccount
+  name: datadog-agent
+  namespace: monitoring
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: datadog-secret
+  namespace: monitoring
+type: Opaque
+data:
+  # Base64 encoded DataDog API key - replace with actual key
+  api-key: <BASE64_ENCODED_DD_API_KEY>

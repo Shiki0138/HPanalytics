@@ -1,0 +1,38 @@
+{
+  "name": "hp-analytics-system",
+  "version": "2.0.0",
+  "description": "市場最強のHP改善分析システム - 本番環境対応版",
+  "main": "public/index.html",
+  "scripts": {
+    "dev": "serve public -p 3000",
+    "build": "echo 'Static files ready for deployment'",
+    "start": "serve public -s -p $PORT",
+    "vercel-build": "echo 'No build step required for static files'",
+    "test": "echo 'Tests will be implemented'",
+    "lint": "echo 'Linting will be implemented'"
+  },
+  "keywords": [
+    "analytics",
+    "website-optimization",
+    "conversion-rate-optimization",
+    "user-experience",
+    "web-analytics",
+    "japanese",
+    "dashboard",
+    "real-time-analytics"
+  ],
+  "author": "HP Analytics Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YOUR_USERNAME/hp-analytics-system.git"
+  },
+  "homepage": "https://hp-analytics-system.vercel.app",
+  "dependencies": {
+    "serve": "^14.2.1"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
