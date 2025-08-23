@@ -311,7 +311,8 @@
             if (allowedUrls.includes(url)) {
                 window.location.href = url;
             } else {
-                console.error('Invalid URL detected');
+                // Silent handling of invalid URLs for security
+                return false;
             }
         };
         

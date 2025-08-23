@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ECサイト分析 - HP改善分析システム</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles/next-gen-design-system.css">
     
     <style>
         * {
@@ -136,54 +136,54 @@
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
         <!-- Key Metrics Dashboard -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 fade-in">
+        <div class="dashboard-grid stagger-fade-in">
             <!-- Today's Sales -->
-            <div class="metric-card rounded-2xl p-6">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm font-medium text-gray-600">今日の売上</span>
-                    <span class="text-2xl">💰</span>
+            <div class="metric-card-v2 interactive-element" data-importance="high" style="--stagger-index: 0">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-caption typography-adaptive">今日の売上</span>
+                    <span class="text-3xl ai-indicator">💰</span>
                 </div>
-                <div class="metric-number text-2xl font-bold text-gray-900 mb-1">¥1,847,520</div>
+                <div class="text-display typography-critical mb-2">¥1,847,520</div>
                 <div class="flex items-center space-x-2">
-                    <span class="text-sm text-green-600 font-semibold">+18.5%</span>
-                    <span class="text-xs text-gray-500">vs 昨日</span>
+                    <span class="text-sm font-semibold" style="color: var(--color-success)">+18.5%</span>
+                    <span class="text-caption">vs 昨日</span>
                 </div>
             </div>
             
             <!-- Conversion Rate -->
-            <div class="metric-card rounded-2xl p-6">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm font-medium text-gray-600">コンバージョン率</span>
-                    <span class="text-2xl">📈</span>
+            <div class="metric-card-v2 interactive-element" data-importance="medium" style="--stagger-index: 1">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-caption typography-adaptive">コンバージョン率</span>
+                    <span class="text-3xl ai-indicator">📈</span>
                 </div>
-                <div class="metric-number text-2xl font-bold text-gray-900 mb-1">4.8%</div>
+                <div class="text-display typography-adaptive mb-2">4.8%</div>
                 <div class="flex items-center space-x-2">
-                    <span class="text-sm text-red-600 font-semibold">-0.3%</span>
-                    <span class="text-xs text-gray-500">vs 先週</span>
+                    <span class="text-sm font-semibold" style="color: var(--color-error)">-0.3%</span>
+                    <span class="text-caption">vs 先週</span>
                 </div>
             </div>
             
             <!-- Cart Abandonment -->
-            <div class="metric-card rounded-2xl p-6">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm font-medium text-gray-600">カート離脱率</span>
-                    <span class="text-2xl">🛒</span>
+            <div class="metric-card-v2 interactive-element" data-importance="critical" style="--stagger-index: 2">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-caption typography-adaptive">カート離脱率</span>
+                    <span class="text-3xl ai-indicator">🛒</span>
                 </div>
-                <div class="metric-number text-2xl font-bold text-red-600 mb-1">68%</div>
+                <div class="text-display typography-critical mb-2" style="color: var(--color-error)">68%</div>
                 <div class="flex items-center space-x-2">
-                    <span class="text-sm text-red-600 font-semibold">+12%</span>
-                    <span class="text-xs text-gray-500">業界平均超過</span>
+                    <span class="text-sm font-semibold" style="color: var(--color-error)">+12%</span>
+                    <span class="text-caption">業界平均超過</span>
                 </div>
             </div>
             
             <!-- Improvement Potential -->
-            <div class="metric-card rounded-2xl p-6 bg-gradient-to-br from-purple-50 to-indigo-50 border-purple-200">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm font-medium text-purple-700">改善可能額</span>
-                    <span class="text-2xl">🚀</span>
+            <div class="metric-card-v2 interactive-element widget--featured" data-importance="high" style="--stagger-index: 3">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-caption typography-adaptive" style="color: var(--color-secondary)">改善可能額</span>
+                    <span class="text-3xl ai-indicator">🚀</span>
                 </div>
-                <div class="metric-number text-2xl font-bold text-purple-700 mb-1">+¥580,000</div>
-                <div class="text-xs text-purple-600 font-medium">日間推定増収</div>
+                <div class="text-display typography-critical mb-2" style="color: var(--color-secondary)">+¥580,000</div>
+                <div class="text-caption font-medium" style="color: var(--color-secondary)">日間推定増収</div>
             </div>
         </div>
 
@@ -330,25 +330,28 @@
         </section>
 
         <!-- Quick Actions -->
-        <section class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8 border border-blue-100">
-            <h2 class="text-xl font-bold text-gray-900 mb-6">今すぐできる改善アクション</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <button onclick="quickFix('cart-optimization')" class="bg-white hover:bg-gray-50 p-4 rounded-xl border border-gray-200 text-left transition-all hover:shadow-md">
-                    <div class="text-lg mb-2">🛒 カート最適化</div>
-                    <div class="text-sm text-gray-600">フォーム項目を3つ削減</div>
-                    <div class="text-xs text-green-600 font-semibold mt-2">効果: +¥50,000/日</div>
+        <section class="glass-morphism-v2 p-8">
+            <h2 class="text-heading typography-adaptive mb-6">今すぐできる改善アクション</h2>
+            <div class="dashboard-grid stagger-fade-in">
+                <button onclick="quickFix('cart-optimization')" class="metric-card-v2 interactive-element text-left" style="--stagger-index: 0">
+                    <div class="text-2xl mb-3 ai-indicator">🛒</div>
+                    <div class="text-subheading typography-adaptive mb-2">カート最適化</div>
+                    <div class="text-body typography-supporting mb-3">フォーム項目を3つ削減</div>
+                    <div class="text-sm font-semibold" style="color: var(--color-success)">効果: +¥50,000/日</div>
                 </button>
                 
-                <button onclick="quickFix('mobile-optimization')" class="bg-white hover:bg-gray-50 p-4 rounded-xl border border-gray-200 text-left transition-all hover:shadow-md">
-                    <div class="text-lg mb-2">📱 モバイル最適化</div>
-                    <div class="text-sm text-gray-600">画像圧縮を自動実行</div>
-                    <div class="text-xs text-green-600 font-semibold mt-2">効果: +¥30,000/日</div>
+                <button onclick="quickFix('mobile-optimization')" class="metric-card-v2 interactive-element text-left" style="--stagger-index: 1">
+                    <div class="text-2xl mb-3 ai-indicator">📱</div>
+                    <div class="text-subheading typography-adaptive mb-2">モバイル最適化</div>
+                    <div class="text-body typography-supporting mb-3">画像圧縮を自動実行</div>
+                    <div class="text-sm font-semibold" style="color: var(--color-success)">効果: +¥30,000/日</div>
                 </button>
                 
-                <button onclick="quickFix('search-improvement')" class="bg-white hover:bg-gray-50 p-4 rounded-xl border border-gray-200 text-left transition-all hover:shadow-md">
-                    <div class="text-lg mb-2">🔍 検索改善</div>
-                    <div class="text-sm text-gray-600">候補表示機能を追加</div>
-                    <div class="text-xs text-green-600 font-semibold mt-2">効果: +¥20,000/日</div>
+                <button onclick="quickFix('search-improvement')" class="metric-card-v2 interactive-element text-left" style="--stagger-index: 2">
+                    <div class="text-2xl mb-3 ai-indicator">🔍</div>
+                    <div class="text-subheading typography-adaptive mb-2">検索改善</div>
+                    <div class="text-body typography-supporting mb-3">候補表示機能を追加</div>
+                    <div class="text-sm font-semibold" style="color: var(--color-success)">効果: +¥20,000/日</div>
                 </button>
             </div>
         </section>
@@ -409,41 +412,94 @@
             if (!solution) return;
             
             const modalContent = document.getElementById('modalContent');
-            modalContent.innerHTML = `
-                <div class="flex items-start justify-between mb-6">
-                    <div>
-                        <h3 class="text-2xl font-bold text-gray-900 mb-2">${solution.title}</h3>
-                        <div class="flex items-center space-x-4">
-                            <span class="impact-badge">${solution.impact}</span>
-                            <span class="text-sm text-gray-600">${solution.timeframe}</span>
-                        </div>
-                    </div>
-                    <button onclick="closeSolutionModal()" class="text-gray-400 hover:text-gray-600 text-2xl">×</button>
-                </div>
+            // Clear existing content
+            modalContent.textContent = '';
+            
+            // Create elements safely using DOM API
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'flex items-start justify-between mb-6';
+            
+            const headerContent = document.createElement('div');
+            const title = document.createElement('h3');
+            title.className = 'text-2xl font-bold text-gray-900 mb-2';
+            title.textContent = solution.title;
+            headerContent.appendChild(title);
+            
+            const badges = document.createElement('div');
+            badges.className = 'flex items-center space-x-4';
+            const impactBadge = document.createElement('span');
+            impactBadge.className = 'impact-badge';
+            impactBadge.textContent = solution.impact;
+            const timeframe = document.createElement('span');
+            timeframe.className = 'text-sm text-gray-600';
+            timeframe.textContent = solution.timeframe;
+            badges.appendChild(impactBadge);
+            badges.appendChild(timeframe);
+            headerContent.appendChild(badges);
+            
+            const closeBtn = document.createElement('button');
+            closeBtn.textContent = '×';
+            closeBtn.className = 'text-gray-400 hover:text-gray-600 text-2xl';
+            closeBtn.onclick = closeSolutionModal;
+            
+            headerDiv.appendChild(headerContent);
+            headerDiv.appendChild(closeBtn);
+            modalContent.appendChild(headerDiv);
+            
+            // Create actions section
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'space-y-4 mb-6';
+            
+            solution.actions.forEach(item => {
+                const actionItem = document.createElement('div');
+                actionItem.className = 'bg-gray-50 p-4 rounded-xl';
                 
-                <div class="space-y-4 mb-6">
-                    ${solution.actions.map(item => `
-                        <div class="bg-gray-50 p-4 rounded-xl">
-                            <div class="flex items-start justify-between">
-                                <div class="flex-1">
-                                    <h4 class="font-semibold text-gray-900 mb-1">${item.action}</h4>
-                                    <div class="text-sm text-green-600 font-medium">${item.impact}</div>
-                                </div>
-                                <button class="text-blue-600 text-sm font-medium hover:text-blue-800">実装 →</button>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
+                const actionContent = document.createElement('div');
+                actionContent.className = 'flex items-start justify-between';
                 
-                <div class="flex space-x-3">
-                    <button onclick="implementSolution('${problemId}')" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 transition-colors flex-1">
-                        今すぐ実装開始
-                    </button>
-                    <button onclick="scheduleSolution('${problemId}')" class="bg-gray-100 text-gray-700 px-6 py-3 rounded-xl font-semibold hover:bg-gray-200 transition-colors">
-                        後で実装
-                    </button>
-                </div>
-            `;
+                const actionDetails = document.createElement('div');
+                actionDetails.className = 'flex-1';
+                
+                const actionTitle = document.createElement('h4');
+                actionTitle.className = 'font-semibold text-gray-900 mb-1';
+                actionTitle.textContent = item.action;
+                
+                const actionImpact = document.createElement('div');
+                actionImpact.className = 'text-sm text-green-600 font-medium';
+                actionImpact.textContent = item.impact;
+                
+                const implementBtn = document.createElement('button');
+                implementBtn.className = 'text-blue-600 text-sm font-medium hover:text-blue-800';
+                implementBtn.textContent = '実装 →';
+                
+                actionDetails.appendChild(actionTitle);
+                actionDetails.appendChild(actionImpact);
+                actionContent.appendChild(actionDetails);
+                actionContent.appendChild(implementBtn);
+                actionItem.appendChild(actionContent);
+                actionsDiv.appendChild(actionItem);
+            });
+            
+            modalContent.appendChild(actionsDiv);
+            
+            // Create button section
+            const buttonDiv = document.createElement('div');
+            buttonDiv.className = 'flex space-x-3';
+            
+            const implementBtn = document.createElement('button');
+            implementBtn.className = 'btn-next-gen btn-primary-v2 flex-1';
+            implementBtn.textContent = '今すぐ実装開始';
+            implementBtn.onclick = () => implementSolution(problemId);
+            
+            const scheduleBtn = document.createElement('button');
+            scheduleBtn.className = 'btn-next-gen glass-morphism-v2';
+            scheduleBtn.style.color = 'var(--color-text-primary)';
+            scheduleBtn.textContent = '後で実装';
+            scheduleBtn.onclick = () => scheduleSolution(problemId);
+            
+            buttonDiv.appendChild(implementBtn);
+            buttonDiv.appendChild(scheduleBtn);
+            modalContent.appendChild(buttonDiv);
             
             document.getElementById('solutionModal').classList.remove('hidden');
         }

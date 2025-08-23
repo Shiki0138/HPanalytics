@@ -56,9 +56,9 @@
         window.HPAnalytics.config.siteId = 'YOUR_SITE_ID';
         
         // デバッグモード（開発時はtrue、本番はfalse）
-        window.HPAnalytics.config.debug = true;
+        window.HPAnalytics.config.debug = false;
         
-        console.log('✅ HP改善分析システムが正常に読み込まれました');
+        // Production mode - no console output
     };
     document.body.appendChild(script);
 })();

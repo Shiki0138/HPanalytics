@@ -134,8 +134,8 @@
                 document.getElementById('rawDataViewer').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
                 
             } catch (e) {
-                console.error('データ解析エラー:', e);
-                document.getElementById('rawDataViewer').innerHTML = '<pre class="text-red-400">データ解析エラー: ' + e.message + '</pre>';
+                // Silent error handling for production security
+                document.getElementById('rawDataViewer').innerHTML = '<pre class="text-red-400">データの読み込みに失敗しました。</pre>';
             }
         }
 
