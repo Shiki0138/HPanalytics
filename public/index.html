@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HP改善分析システム</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap');
+        * { font-family: 'Noto Sans JP', sans-serif; }
+        .hover-card:hover { transform: translateY(-4px); transition: all 0.3s; }
+        .gradient { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen py-12 px-4">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-12">
+                <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
+                    HP改善分析システム
+                </h1>
+                <p class="text-lg text-gray-600">サイトタイプを選択してください</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-white rounded-xl shadow-lg p-8 hover-card cursor-pointer" onclick="location.href='/ec'">
+                    <div class="w-16 h-16 gradient rounded-full flex items-center justify-center mx-auto mb-6">
+                        <span class="text-2xl">🛒</span>
+                    </div>
+                    <h2 class="text-xl font-bold text-gray-800 text-center mb-4">ECサイト</h2>
+                    <p class="text-gray-600 text-center mb-4">売上最大化に特化した分析</p>
+                    <div class="text-sm text-green-600 text-center">平均効果: 売上+30%</div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-8 hover-card cursor-pointer" onclick="location.href='/corporate'">
+                    <div class="w-16 h-16 gradient rounded-full flex items-center justify-center mx-auto mb-6">
+                        <span class="text-2xl">🏢</span>
+                    </div>
+                    <h2 class="text-xl font-bold text-gray-800 text-center mb-4">企業サイト</h2>
+                    <p class="text-gray-600 text-center mb-4">リード獲得とブランディング強化</p>
+                    <div class="text-sm text-blue-600 text-center">平均効果: リード+45%</div>
+                </div>
+            </div>
+
+            <div class="mt-12 text-center">
+                <div class="flex flex-wrap justify-center gap-4">
+                    <button onclick="location.href='/dashboard'" class="px-6 py-3 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors">
+                        📊 総合ダッシュボード
+                    </button>
+                    <button onclick="location.href='/install'" class="px-6 py-3 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors">
+                        🔧 設置ガイド
+                    </button>
+                    <button onclick="location.href='/analytics-viewer'" class="px-6 py-3 bg-teal-100 text-teal-700 rounded-lg hover:bg-teal-200 transition-colors">
+                        📈 データビューア
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

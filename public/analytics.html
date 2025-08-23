@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>市場最強売上分析システム - 完全版</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap');
+        body { 
+            font-family: 'Noto Sans JP', sans-serif; 
+            overflow-x: hidden;
+        }
+        .gradient-header { 
+            background: linear-gradient(135deg, #1e40af 0%, #7c3aed 50%, #1e40af 100%);
+            background-size: 200% 200%;
+            animation: gradientShift 6s ease infinite;
+        }
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .float-animation { animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
+        .glow-effect { box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
+        .pulse-glow { animation: pulseGlow 2s infinite; }
+        @keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 5px rgba(34, 197, 94, 0.5); } 50% { box-shadow: 0 0 20px rgba(34, 197, 94, 0.8); } }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 min-h-screen">
+    
+    <!-- ローディングスクリーン -->
+    <div id="loading" class="fixed inset-0 bg-white z-50 flex items-center justify-center">
+        <div class="text-center">
+            <div class="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <h2 class="text-xl font-bold text-gray-800">AI分析システム起動中</h2>
+            <p class="text-gray-600 mt-2">市場最強のダッシュボードを準備しています...</p>
+            <div class="mt-4">
+                <div class="flex justify-center space-x-1">
+                    <div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 0ms"></div>
+                    <div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 150ms"></div>
+                    <div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 300ms"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- メインアプリ -->
+    <div id="app" class="hidden">
+        
+        <!-- ヘッダー -->
+        <header class="gradient-header text-white py-6 shadow-2xl relative overflow-hidden">
+            <div class="absolute inset-0 bg-black opacity-10"></div>
+            <div class="relative max-w-7xl mx-auto px-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-14 h-14 bg-white bg-opacity-20 rounded-full flex items-center justify-center float-animation">
+                            <span class="text-3xl">🚀</span>
+                        </div>
+                        <div>
+                            <h1 class="text-3xl font-bold">市場最強売上分析システム</h1>
+                            <p class="text-lg opacity-90 mt-1">AI駆動の売上最大化プラットフォーム</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-6">
+                        <div class="text-center">
+                            <div class="text-sm opacity-75">システム状態</div>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-3 h-3 bg-green-400 rounded-full pulse-glow"></div>
+                                <span class="font-semibold">AI分析中</span>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold" id="realtime-sales">¥1,847,520</div>
+                            <div class="text-sm opacity-75">リアルタイム売上</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- AI緊急アラート -->
+        <div class="max-w-7xl mx-auto px-6 -mt-4 mb-6 relative z-10">
+            <div class="bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-lg p-4 shadow-lg glow-effect">
+                <div class="flex items-center space-x-3">
+                    <div class="text-3xl animate-pulse">🚨</div>
+                    <div>
+                        <h3 class="font-bold text-lg">緊急：売上急増を検知</h3>
+                        <p class="text-sm mt-1">
+                            過去1時間で売上が通常比+240%急増中！プレミアムプランへの注文が殺到しています。
+                            <strong>在庫確保とサーバー増強を即座に実行してください。</strong>
+                        </p>
+                    </div>
+                    <button class="bg-white text-red-500 px-4 py-2 rounded font-bold hover:bg-gray-100 transition-colors" onclick="handleEmergencyAction()">
+                        緊急対応
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- メインダッシュボード -->
+        <main class="max-w-7xl mx-auto px-6 pb-12">
+            
+            <!-- KPI概要 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500 hover:shadow-xl transition-shadow">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="text-4xl">💰</div>
+                        <div class="text-green-600 bg-green-100 px-3 py-1 rounded-full text-sm font-bold">
+                            +18.5%
+                        </div>
+                    </div>
+                    <h3 class="text-gray-600 text-sm font-medium">今日の売上</h3>
+                    <p class="text-3xl font-bold text-gray-900 mb-1" id="today-sales">¥1,847,520</p>
+                    <p class="text-sm text-green-600">前日比 +¥287,940</p>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500 hover:shadow-xl transition-shadow">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="text-4xl">📊</div>
+                        <div class="text-blue-600 bg-blue-100 px-3 py-1 rounded-full text-sm font-bold">
+                            +12.3%
+                        </div>
+                    </div>
+                    <h3 class="text-gray-600 text-sm font-medium">今月の売上</h3>
+                    <p class="text-3xl font-bold text-gray-900 mb-1">¥42,350,000</p>
+                    <p class="text-sm text-blue-600">前月比 +¥4,638,000</p>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-purple-500 hover:shadow-xl transition-shadow">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="text-4xl">🎯</div>
+                        <div class="text-purple-600 bg-purple-100 px-3 py-1 rounded-full text-sm font-bold">
+                            +0.6pt
+                        </div>
+                    </div>
+                    <h3 class="text-gray-600 text-sm font-medium">コンバージョン率</h3>
+                    <p class="text-3xl font-bold text-gray-900 mb-1">4.8%</p>
+                    <p class="text-sm text-purple-600">前週比 +0.6ポイント</p>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-orange-500 hover:shadow-xl transition-shadow">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="text-4xl">🏆</div>
+                        <div class="text-orange-600 bg-orange-100 px-3 py-1 rounded-full text-sm font-bold">
+                            108%
+                        </div>
+                    </div>
+                    <h3 class="text-gray-600 text-sm font-medium">予測達成率</h3>
+                    <p class="text-3xl font-bold text-gray-900 mb-1">108%</p>
+                    <p class="text-sm text-orange-600">目標を8%上回り</p>
+                </div>
+            </div>
+
+            <!-- AI分析とアクション -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                
+                <!-- AI分析結果 -->
+                <div class="lg:col-span-2 bg-white rounded-xl shadow-lg p-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center space-x-3">
+                        <span class="text-3xl">🧠</span>
+                        <span>AI分析インサイト</span>
+                        <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">リアルタイム</span>
+                    </h2>
+                    
+                    <div class="space-y-4">
+                        <div class="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-6">
+                            <div class="flex items-start space-x-4">
+                                <div class="text-3xl">🚀</div>
+                                <div>
+                                    <h3 class="text-lg font-bold text-green-800 mb-2">爆発的売上成長を検知</h3>
+                                    <p class="text-green-700 mb-4">
+                                        売上が前月比18.5%増加中。特にプレミアムプランが+340%の異常成長。
+                                        競合他社のサービス障害とSNSバイラル効果が重なり、千載一遇のチャンス到来。
+                                    </p>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm font-medium text-green-600">推奨アクション: マーケティング予算緊急増額</span>
+                                        <span class="text-sm font-bold text-green-800">期待効果: ¥2,500,000</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-lg p-6">
+                            <div class="flex items-start space-x-4">
+                                <div class="text-3xl">⚠️</div>
+                                <div>
+                                    <h3 class="text-lg font-bold text-red-800 mb-2">在庫枯渇リスク（高優先度）</h3>
+                                    <p class="text-red-700 mb-4">
+                                        プレミアムプランの在庫が残り18%。現在の注文ペースでは3時間で完売予定。
+                                        機会損失を防ぐため緊急補充が必要。
+                                    </p>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm font-medium text-red-600">推奨アクション: 緊急在庫補充 + 予約注文システム稼働</span>
+                                        <span class="text-sm font-bold text-red-800">防げる損失: ¥3,200,000</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-lg p-6">
+                            <div class="flex items-start space-x-4">
+                                <div class="text-3xl">💡</div>
+                                <div>
+                                    <h3 class="text-lg font-bold text-blue-800 mb-2">新市場獲得のチャンス</h3>
+                                    <p class="text-blue-700 mb-4">
+                                        検索トラフィックが+180%急増。新規顧客の70%が初回購入を検討中。
+                                        特別キャンペーンで市場シェア拡大の絶好機。
+                                    </p>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm font-medium text-blue-600">推奨アクション: 新規限定キャンペーン + リターゲティング強化</span>
+                                        <span class="text-sm font-bold text-blue-800">期待効果: ¥1,800,000</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 緊急アクション -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center space-x-3">
+                        <span class="text-3xl">⚡</span>
+                        <span>緊急実行</span>
+                        <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-sm">3分以内</span>
+                    </h2>
+                    
+                    <div class="space-y-4">
+                        <div class="border-2 border-red-200 rounded-lg p-4 bg-red-50">
+                            <div class="flex justify-between items-start mb-3">
+                                <h3 class="font-bold text-red-800">🔥 在庫緊急補充</h3>
+                                <span class="bg-red-500 text-white px-2 py-1 rounded text-xs">最優先</span>
+                            </div>
+                            <p class="text-sm text-red-700 mb-3">プレミアムプランの自動発注を即座に実行</p>
+                            <div class="text-xs text-red-600 mb-3">
+                                <div>防げる損失: ¥3,200,000</div>
+                                <div>実行時間: 30秒</div>
+                            </div>
+                            <button class="w-full bg-red-500 text-white py-3 rounded-lg font-bold hover:bg-red-600 transition-colors" onclick="executeEmergencyAction('在庫補充')">
+                                🚨 緊急実行
+                            </button>
+                        </div>
+                        
+                        <div class="border border-orange-200 rounded-lg p-4 hover:bg-orange-50 transition-colors">
+                            <div class="flex justify-between items-start mb-3">
+                                <h3 class="font-bold text-orange-800">🎯 動的価格最適化</h3>
+                                <span class="bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs">高効果</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-3">需要急増に応じた価格調整</p>
+                            <div class="text-xs text-gray-500 mb-3">
+                                <div>期待効果: ¥850,000</div>
+                                <div>実行時間: 2分</div>
+                            </div>
+                            <button class="w-full bg-orange-500 text-white py-2 rounded-lg font-bold hover:bg-orange-600 transition-colors" onclick="executeAction('価格最適化')">
+                                実行
+                            </button>
+                        </div>
+                        
+                        <div class="border border-blue-200 rounded-lg p-4 hover:bg-blue-50 transition-colors">
+                            <div class="flex justify-between items-start mb-3">
+                                <h3 class="font-bold text-blue-800">📢 キャンペーン拡大</h3>
+                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">簡単</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-3">広告予算の自動増額と配信拡大</p>
+                            <div class="text-xs text-gray-500 mb-3">
+                                <div>期待効果: ¥1,200,000</div>
+                                <div>実行時間: 1分</div>
+                            </div>
+                            <button class="w-full bg-blue-500 text-white py-2 rounded-lg font-bold hover:bg-blue-600 transition-colors" onclick="executeAction('キャンペーン拡大')">
+                                実行
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 詳細分析 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center space-x-2">
+                        <span class="text-2xl">🏆</span>
+                        <span>商品パフォーマンス</span>
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between p-4 bg-red-50 rounded-lg border-l-4 border-red-500">
+                            <div class="flex items-center space-x-3">
+                                <div class="text-2xl">🔥</div>
+                                <div>
+                                    <div class="font-bold text-gray-800">プレミアムプラン</div>
+                                    <div class="text-sm text-red-600">在庫警告</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-bold text-2xl text-gray-900">¥2,850,000</div>
+                                <div class="text-sm text-red-600 font-bold">+340%</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between p-4 bg-green-50 rounded-lg">
+                            <div class="flex items-center space-x-3">
+                                <div class="text-2xl">📈</div>
+                                <span class="font-bold text-gray-800">スタンダードプラン</span>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-bold text-xl text-gray-900">¥920,000</div>
+                                <div class="text-sm text-green-600">+28%</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
+                            <div class="flex items-center space-x-3">
+                                <div class="text-2xl">📊</div>
+                                <span class="font-bold text-gray-800">ベーシックプラン</span>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-bold text-xl text-gray-900">¥380,000</div>
+                                <div class="text-sm text-blue-600">+12%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center space-x-2">
+                        <span class="text-2xl">👥</span>
+                        <span>顧客セグメント</span>
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between p-4 bg-green-50 rounded-lg">
+                            <div>
+                                <div class="font-bold text-gray-800">新規顧客</div>
+                                <div class="text-sm text-green-600">2,847人 (+67%)</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-bold text-xl text-gray-900">¥25,000</div>
+                                <div class="text-sm text-gray-600">平均購入額</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
+                            <div>
+                                <div class="font-bold text-gray-800">リピート顧客</div>
+                                <div class="text-sm text-blue-600">1,256人 (+23%)</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-bold text-xl text-gray-900">¥45,000</div>
+                                <div class="text-sm text-gray-600">平均購入額</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between p-4 bg-purple-50 rounded-lg">
+                            <div>
+                                <div class="font-bold text-gray-800">VIP顧客</div>
+                                <div class="text-sm text-purple-600">187人 (+15%)</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-bold text-xl text-gray-900">¥185,000</div>
+                                <div class="text-sm text-gray-600">平均購入額</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- フローティングAIアシスタント -->
+        <div class="fixed bottom-6 right-6">
+            <button class="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl transition-shadow float-animation" onclick="toggleAIChat()">
+                <span class="text-2xl">🤖</span>
+            </button>
+        </div>
+
+        <!-- AI チャットモーダル -->
+        <div id="ai-chat-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50" onclick="toggleAIChat()">
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl" onclick="event.stopPropagation()">
+                    <div class="p-6 border-b">
+                        <h3 class="text-xl font-bold text-gray-800 flex items-center space-x-2">
+                            <span class="text-2xl">🤖</span>
+                            <span>売上分析AIアシスタント</span>
+                        </h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="bg-blue-50 rounded-lg p-4 mb-4">
+                            <p class="text-blue-800">
+                                <strong>🚀 現在の状況:</strong> 異常な売上急増を検知中です。どのような分析をお手伝いしましょうか？
+                            </p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <button class="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left" onclick="askAI('今の売上急増の原因を詳しく分析して')">
+                                <div class="font-bold text-gray-800">📊 売上急増分析</div>
+                                <div class="text-sm text-gray-600">原因と今後の予測</div>
+                            </button>
+                            <button class="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left" onclick="askAI('在庫管理の最適化案を提案して')">
+                                <div class="font-bold text-gray-800">📦 在庫最適化</div>
+                                <div class="text-sm text-gray-600">緊急対応策</div>
+                            </button>
+                            <button class="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left" onclick="askAI('マーケティング戦略の改善案を教えて')">
+                                <div class="font-bold text-gray-800">📢 マーケ戦略</div>
+                                <div class="text-sm text-gray-600">効果的な施策</div>
+                            </button>
+                            <button class="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left" onclick="askAI('競合他社の状況を分析して')">
+                                <div class="font-bold text-gray-800">🆚 競合分析</div>
+                                <div class="text-sm text-gray-600">市場動向</div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // アプリケーション初期化
+        let realtimeSales = 1847520;
+        let isAIChatOpen = false;
+
+        // ローディング完了
+        setTimeout(() => {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('app').classList.remove('hidden');
+            startRealtimeUpdates();
+        }, 2000);
+
+        // リアルタイム更新
+        function startRealtimeUpdates() {
+            setInterval(() => {
+                const variation = (Math.random() - 0.4) * 50000; // 売上変動
+                realtimeSales += variation;
+                
+                document.getElementById('realtime-sales').textContent = 
+                    '¥' + Math.round(realtimeSales).toLocaleString('ja-JP');
+                
+                document.getElementById('today-sales').textContent = 
+                    '¥' + Math.round(realtimeSales).toLocaleString('ja-JP');
+            }, 5000);
+        }
+
+        // 緊急対応アクション
+        function handleEmergencyAction() {
+            if (confirm('緊急対応を実行しますか？\n- 在庫緊急補充\n- サーバーリソース増強\n- 顧客サポート体制強化')) {
+                alert('🚨 緊急対応を実行中...\n\n✅ 在庫緊急補充: 完了\n✅ サーバー増強: 完了\n✅ サポート強化: 完了\n\n売上機会を最大化しています！');
+            }
+        }
+
+        // 緊急アクション実行
+        function executeEmergencyAction(actionName) {
+            const messages = {
+                '在庫補充': '🚨 在庫緊急補充を実行中...\n\n✅ プレミアムプランの在庫を1000台追加\n✅ 予約注文システム稼働開始\n✅ 機会損失 ¥3,200,000 を防御成功！'
+            };
+            
+            setTimeout(() => {
+                alert(messages[actionName] || `✅ ${actionName}の実行が完了しました！`);
+            }, 1000);
+        }
+
+        // 通常アクション実行
+        function executeAction(actionName) {
+            const messages = {
+                '価格最適化': '⚡ 動的価格最適化を実行中...\n\n✅ プレミアムプラン価格を需要に応じて調整\n✅ 期待売上効果: ¥850,000',
+                'キャンペーン拡大': '📢 キャンペーン拡大を実行中...\n\n✅ 広告予算を自動で50%増額\n✅ 配信範囲を拡大\n✅ 期待売上効果: ¥1,200,000'
+            };
+            
+            setTimeout(() => {
+                alert(messages[actionName] || `✅ ${actionName}の実行が完了しました！`);
+            }, 1500);
+        }
+
+        // AIチャット切り替え
+        function toggleAIChat() {
+            const modal = document.getElementById('ai-chat-modal');
+            isAIChatOpen = !isAIChatOpen;
+            modal.classList.toggle('hidden', !isAIChatOpen);
+        }
+
+        // AI質問
+        function askAI(question) {
+            const responses = {
+                '今の売上急増の原因を詳しく分析して': 
+                    '🤖 AI分析結果:\n\n📊 売上急増の主要因:\n1. 競合他社Aのサービス障害(40%)\n2. SNSでのバイラル効果(35%)\n3. 季節需要の前倒し(25%)\n\n📈 予測:\n- 今後3日間は高水準維持\n- 1週間後に通常の120%水準に安定\n- 新規顧客の30%がリピート化見込み',
+                
+                '在庫管理の最適化案を提案して':
+                    '🤖 在庫最適化案:\n\n📦 緊急対応:\n1. プレミアムプラン1000台即日補充\n2. 予約注文システム稼働\n3. 代替商品への誘導設定\n\n🔄 長期改善:\n- AI予測による自動発注\n- 安全在庫水準の再設定\n- サプライヤー複数化',
+                
+                'マーケティング戦略の改善案を教えて':
+                    '🤖 マーケ戦略案:\n\n📢 即時実行:\n1. 広告予算50%増額(3日限定)\n2. 新規限定20%オフキャンペーン\n3. SNS拡散施策強化\n\n📈 中長期戦略:\n- インフルエンサー連携拡大\n- コンテンツマーケ強化\n- リターゲティング最適化',
+                
+                '競合他社の状況を分析して':
+                    '🤖 競合分析:\n\n🆚 主要競合状況:\n- 競合A: サービス障害で売上-80%\n- 競合B: 通常運営、市場シェア+5%\n- 競合C: 価格競争で収益性悪化\n\n💡 チャンス:\n- 競合Aの顧客流入継続中\n- 価格優位性を維持可能\n- 市場シェア拡大の絶好機'
+            };
+            
+            alert(responses[question] || '🤖 AIが分析中です...');
+        }
+    </script>
+</body>
+</html>

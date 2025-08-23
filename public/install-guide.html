@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HP改善分析システム - トラッキングタグ設置ガイド</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Noto Sans JP', sans-serif; }
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem;
+            overflow-x: auto;
+        }
+        .copy-button {
+            transition: all 0.2s;
+        }
+        .copy-button:hover {
+            background: #4ade80 !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="max-w-4xl mx-auto p-6">
+        <!-- ヘッダー -->
+        <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-4">🚀 HP改善分析システム - 設置ガイド</h1>
+            <p class="text-gray-600">
+                たった1行のコードを追加するだけで、あなたのサイトの問題点を自動で発見し、改善提案を行います。
+            </p>
+        </div>
+
+        <!-- ステップ1: 基本タグの設置 -->
+        <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+            <div class="flex items-center mb-4">
+                <div class="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold mr-4">1</div>
+                <h2 class="text-xl font-bold text-gray-900">基本トラッキングタグの設置</h2>
+            </div>
+            
+            <p class="text-gray-600 mb-4">
+                以下のコードをあなたのサイトの全ページの <code class="bg-gray-100 px-2 py-1 rounded">&lt;/body&gt;</code> タグの直前に貼り付けてください。
+            </p>
+
+            <div class="relative">
+                <pre class="code-block"><code>&lt;!-- HP改善分析システム - トラッキングタグ --&gt;
+&lt;script&gt;
+(function(){
+    var script = document.createElement('script');
+    script.src = 'http://localhost:8000/tracking-tag.js';
+    script.async = true;
+    script.onload = function() {
+        // サイトIDを設定（必須）
+        window.HPAnalytics.config.siteId = 'YOUR_SITE_ID';
+        
+        // デバッグモード（開発時はtrue、本番はfalse）
+        window.HPAnalytics.config.debug = true;
+        
+        console.log('✅ HP改善分析システムが正常に読み込まれました');
+    };
+    document.body.appendChild(script);
+})();
+&lt;/script&gt;
+&lt;!-- /HP改善分析システム --&gt;</code></pre>
+                <button onclick="copyCode(this)" class="absolute top-2 right-2 bg-gray-700 text-white px-3 py-1 rounded text-sm copy-button">
+                    コピー
+                </button>
+            </div>
+        </div>
+
+        <!-- ステップ2: ECサイト用の追加設定 -->
+        <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+            <div class="flex items-center mb-4">
+                <div class="w-10 h-10 bg-green-500 text-white rounded-full flex items-center justify-center font-bold mr-4">2</div>
+                <h2 class="text-xl font-bold text-gray-900">ECサイト用の追加トラッキング（オプション）</h2>
+            </div>
+            
+            <p class="text-gray-600 mb-4">
+                ECサイトの場合、以下の追加コードでより詳細な分析が可能になります。
+            </p>
+
+            <div class="space-y-4">
+                <!-- 商品ページ用 -->
+                <div>
+                    <h3 class="font-semibold text-gray-800 mb-2">商品ページ用コード</h3>
+                    <div class="relative">
+                        <pre class="code-block"><code>&lt;script&gt;
+// 商品ページビューのトラッキング
+window.HPAnalytics.trackEvent('product_view', {
+    productId: '商品ID',
+    productName: '商品名',
+    price: 1980,
+    category: 'カテゴリー名'
+});
+&lt;/script&gt;</code></pre>
+                        <button onclick="copyCode(this)" class="absolute top-2 right-2 bg-gray-700 text-white px-3 py-1 rounded text-sm copy-button">
+                            コピー
+                        </button>
+                    </div>
+                </div>
+
+                <!-- カートページ用 -->
+                <div>
+                    <h3 class="font-semibold text-gray-800 mb-2">カートページ用コード</h3>
+                    <div class="relative">
+                        <pre class="code-block"><code>&lt;script&gt;
+// カート追加のトラッキング
+window.HPAnalytics.trackEvent('add_to_cart', {
+    productId: '商品ID',
+    quantity: 1,
+    price: 1980
+});
+&lt;/script&gt;</code></pre>
+                        <button onclick="copyCode(this)" class="absolute top-2 right-2 bg-gray-700 text-white px-3 py-1 rounded text-sm copy-button">
+                            コピー
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ステップ3: 動作確認 -->
+        <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+            <div class="flex items-center mb-4">
+                <div class="w-10 h-10 bg-purple-500 text-white rounded-full flex items-center justify-center font-bold mr-4">3</div>
+                <h2 class="text-xl font-bold text-gray-900">動作確認方法</h2>
+            </div>
+            
+            <p class="text-gray-600 mb-4">
+                ブラウザの開発者ツール（F12）を開いて、コンソールタブで以下を確認してください。
+            </p>
+
+            <div class="space-y-4">
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <h4 class="font-semibold text-green-800 mb-2">✅ 正常に動作している場合</h4>
+                    <ul class="text-sm text-green-700 space-y-1">
+                        <li>• 「✅ HP改善分析システムが正常に読み込まれました」と表示される</li>
+                        <li>• 「📊 HP Analytics: Page view tracked」などのログが表示される</li>
+                        <li>• エラーが表示されない</li>
+                    </ul>
+                </div>
+
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h4 class="font-semibold text-blue-800 mb-2">🔍 収集データの確認方法</h4>
+                    <p class="text-sm text-blue-700 mb-2">コンソールで以下のコマンドを実行：</p>
+                    <pre class="bg-blue-100 p-2 rounded text-xs">JSON.parse(localStorage.getItem('hp_analytics_data'))</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- 収集されるデータ -->
+        <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">📊 収集されるデータ</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h3 class="font-semibold text-gray-800 mb-2">ユーザー行動</h3>
+                    <ul class="text-sm text-gray-600 space-y-1">
+                        <li>✓ ページビュー・滞在時間</li>
+                        <li>✓ スクロール深度</li>
+                        <li>✓ クリック位置・要素</li>
+                        <li>✓ フォーム入力・離脱</li>
+                        <li>✓ 検索キーワード</li>
+                    </ul>
+                </div>
+                
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h3 class="font-semibold text-gray-800 mb-2">技術的データ</h3>
+                    <ul class="text-sm text-gray-600 space-y-1">
+                        <li>✓ ページ読み込み速度</li>
+                        <li>✓ エラー発生状況</li>
+                        <li>✓ デバイス・画面サイズ</li>
+                        <li>✓ ブラウザ情報</li>
+                        <li>✓ リファラー（流入元）</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- プライバシーポリシー -->
+        <div class="bg-gray-100 rounded-lg p-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-2">🔒 プライバシーとセキュリティ</h2>
+            <ul class="text-sm text-gray-600 space-y-2">
+                <li>• 個人を特定する情報（氏名、メールアドレス等）は収集しません</li>
+                <li>• すべてのデータは暗号化して送信されます</li>
+                <li>• GDPR、個人情報保護法に準拠した設計です</li>
+                <li>• デバッグモードではデータはローカルストレージに保存されます</li>
+            </ul>
+        </div>
+
+    </div>
+
+    <script>
+        function copyCode(button) {
+            const codeBlock = button.parentElement.querySelector('code');
+            const text = codeBlock.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = button.textContent;
+                button.textContent = 'コピーしました！';
+                button.style.background = '#22c55e';
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.background = '';
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>

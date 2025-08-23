@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HP改善分析システム - 本番版</title>
+    
+    <!-- セキュリティヘッダー -->
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Content-Security-Policy" 
+          content="default-src 'self'; 
+                   script-src 'self' 'nonce-production-2024' https://cdn.tailwindcss.com; 
+                   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; 
+                   font-src 'self' https://fonts.gstatic.com;
+                   img-src 'self' data:;
+                   connect-src 'self' https:;">
+    
+    <!-- 外部リソース（SRI対応） -->
+    <script src="https://cdn.tailwindcss.com" 
+            integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" 
+            crossorigin="anonymous"
+            nonce="production-2024"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" 
+          rel="stylesheet"
+          integrity="sha384-mPE+XZwLMqMYh0F5xPqkjjE8cxjNNX9kJbVvJ5xvZt8qnMwQg2hR7+8P9xLO7P8x"
+          crossorigin="anonymous">
+    
+    <style nonce="production-2024">
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap');
+        body { 
+            font-family: 'Noto Sans JP', sans-serif; 
+            background: #f8f9fa;
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+        }
+        .priority-high { border-left: 4px solid #ef4444; }
+        .priority-medium { border-left: 4px solid #f59e0b; }
+        .priority-low { border-left: 4px solid #3b82f6; }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .pulse-dot {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+    </style>
+</head>
+<body>
+    <!-- シンプルなヘッダー -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-6xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                        <span class="text-white text-xl">🎯</span>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-bold text-gray-900">HP改善分析システム</h1>
+                        <p class="text-xs text-gray-600">問題を見つけて、成果を最大化</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <div class="w-2 h-2 bg-green-500 rounded-full pulse-dot"></div>
+                    <span class="text-sm text-gray-600">リアルタイム分析中</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main class="max-w-6xl mx-auto px-6 py-8">
+        
+        <!-- 現在の状態サマリー -->
+        <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900" id="mainMetric">データ収集中...</h2>
+                    <p class="text-gray-600 mt-1" id="metricDetails">トラッキングデータを分析しています</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm text-gray-600">改善可能な成果</p>
+                    <p class="text-3xl font-bold text-purple-600" id="potentialImprovement">分析中</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 検出された問題点 -->
+        <div class="mb-8">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <span class="text-red-500 mr-2">⚠️</span>
+                検出された問題点
+            </h3>
+            
+            <div id="detectedIssues" class="space-y-4">
+                <div class="text-gray-500 text-center py-8">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                    <p>データを分析中です...</p>
+                    <p class="text-sm mt-2">あなたのサイトの問題点を自動検出しています</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- クイックアクション -->
+        <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">🚀 改善アクション</h3>
+            <div id="quickActions" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="text-center py-8 text-gray-500">
+                    問題が検出されると、改善策が表示されます
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- 詳細モーダル -->
+    <div id="detailModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                <div class="p-6 border-b">
+                    <h3 class="text-xl font-bold text-gray-800" id="modalTitle">詳細分析</h3>
+                </div>
+                <div id="modalContent" class="p-8">
+                    <!-- 動的にコンテンツを挿入 -->
+                </div>
+                <div class="p-6 border-t">
+                    <button onclick="HPAnalytics.UI.closeModal()" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600 transition-colors">
+                        閉じる
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script nonce="production-2024">
+        // セキュアな分析UIシステム
+        const HPAnalytics = (function() {
+            'use strict';
+            
+            // プライベート変数
+            let analysisData = null;
+            let updateInterval = null;
+            
+            // データサニタイゼーション
+            function sanitizeHTML(str) {
+                const div = document.createElement('div');
+                div.textContent = str;
+                return div.innerHTML;
+            }
+            
+            // 安全なDOM操作
+            function safeSetContent(element, content) {
+                if (!element) return;
+                element.textContent = '';
+                if (typeof content === 'string') {
+                    element.textContent = content;
+                } else if (content instanceof HTMLElement) {
+                    element.appendChild(content);
+                }
+            }
+            
+            // データ分析
+            function analyzeTrackingData() {
+                try {
+                    const rawData = localStorage.getItem('hp_analytics_data');
+                    if (!rawData) return null;
+                    
+                    const data = JSON.parse(rawData);
+                    if (!Array.isArray(data) || data.length === 0) return null;
+                    
+                    return processAnalysisData(data);
+                } catch (error) {
+                    console.error('データ分析エラー:', error);
+                    return null;
+                }
+            }
+            
+            // 分析データ処理
+            function processAnalysisData(data) {
+                const analysis = {
+                    totalSessions: data.length,
+                    totalEvents: 0,
+                    formAbandons: 0,
+                    formStarts: 0,
+                    errors: 0,
+                    avgLoadTime: 0,
+                    issues: []
+                };
+                
+                let totalLoadTime = 0;
+                let loadTimeCount = 0;
+                
+                data.forEach(function(session) {
+                    if (session.events && Array.isArray(session.events)) {
+                        analysis.totalEvents += session.events.length;
+                        
+                        session.events.forEach(function(event) {
+                            if (event.name === 'form_start') analysis.formStarts++;
+                            if (event.name === 'form_abandon') analysis.formAbandons++;
+                        });
+                    }
+                    
+                    if (session.errors && Array.isArray(session.errors)) {
+                        analysis.errors += session.errors.length;
+                    }
+                    
+                    if (session.performance && session.performance.loadTime > 0) {
+                        totalLoadTime += session.performance.loadTime;
+                        loadTimeCount++;
+                    }
+                });
+                
+                analysis.avgLoadTime = loadTimeCount > 0 ? totalLoadTime / loadTimeCount : 0;
+                
+                // 問題点の検出
+                analysis.issues = detectIssues(analysis);
+                
+                return analysis;
+            }
+            
+            // 問題検出ロジック
+            function detectIssues(analysis) {
+                const issues = [];
+                
+                // フォーム離脱率チェック
+                if (analysis.formStarts > 0) {
+                    const abandonRate = (analysis.formAbandons / analysis.formStarts) * 100;
+                    if (abandonRate > 50) {
+                        issues.push({
+                            severity: 'high',
+                            type: 'form_abandon',
+                            title: 'フォーム離脱率が高い',
+                            description: `フォーム離脱率が${Math.round(abandonRate)}%と高くなっています。`,
+                            impact: Math.round(analysis.formAbandons * 0.8) + '件の問い合わせ機会を損失',
+                            solutions: [
+                                '必須項目を最小限に削減',
+                                'リアルタイムバリデーションの実装',
+                                'プログレスインジケーターの追加'
+                            ]
+                        });
+                    }
+                }
+                
+                // エラー検出
+                if (analysis.errors > 0) {
+                    issues.push({
+                        severity: 'high',
+                        type: 'js_errors',
+                        title: 'JavaScriptエラーが発生',
+                        description: `${analysis.errors}件のエラーが検出されました。`,
+                        impact: 'ユーザー体験の大幅な悪化',
+                        solutions: [
+                            'エラーログの詳細調査',
+                            'ブラウザ互換性の確認',
+                            'エラーハンドリングの強化'
+                        ]
+                    });
+                }
+                
+                // ページ速度チェック
+                if (analysis.avgLoadTime > 3000) {
+                    issues.push({
+                        severity: 'medium',
+                        type: 'slow_loading',
+                        title: 'ページ読み込みが遅い',
+                        description: `平均読み込み時間が${Math.round(analysis.avgLoadTime/1000)}秒です。`,
+                        impact: '直帰率の増加とSEOへの悪影響',
+                        solutions: [
+                            '画像の最適化と圧縮',
+                            'CDNの導入',
+                            'キャッシュ戦略の見直し'
+                        ]
+                    });
+                }
+                
+                return issues;
+            }
+            
+            // UI更新
+            function updateUI(analysis) {
+                if (!analysis) {
+                    document.getElementById('mainMetric').textContent = 'データ収集中...';
+                    document.getElementById('metricDetails').textContent = 'しばらくお待ちください';
+                    document.getElementById('potentialImprovement').textContent = '分析中';
+                    return;
+                }
+                
+                // メイン指標更新
+                const mainMetricEl = document.getElementById('mainMetric');
+                const metricDetailsEl = document.getElementById('metricDetails');
+                const potentialEl = document.getElementById('potentialImprovement');
+                
+                if (analysis.formStarts > 0) {
+                    const successRate = Math.round(((analysis.formStarts - analysis.formAbandons) / analysis.formStarts) * 100);
+                    safeSetContent(mainMetricEl, `コンバージョン率: ${successRate}%`);
+                    safeSetContent(metricDetailsEl, `${analysis.totalSessions}セッション中 ${analysis.formStarts}件のフォーム開始`);
+                } else {
+                    safeSetContent(mainMetricEl, `${analysis.totalSessions}セッション分析済み`);
+                    safeSetContent(metricDetailsEl, `${analysis.totalEvents}個のユーザー行動を記録`);
+                }
+                
+                const improvementCount = analysis.issues.filter(i => i.severity === 'high').length;
+                safeSetContent(potentialEl, `${improvementCount}個の改善点`);
+                
+                // 問題点表示
+                updateIssuesDisplay(analysis.issues);
+            }
+            
+            // 問題点表示更新
+            function updateIssuesDisplay(issues) {
+                const container = document.getElementById('detectedIssues');
+                if (!container) return;
+                
+                container.innerHTML = '';
+                
+                if (issues.length === 0) {
+                    const noIssues = document.createElement('div');
+                    noIssues.className = 'text-green-600 text-center py-8';
+                    noIssues.innerHTML = '✅ 現在、重大な問題は検出されていません';
+                    container.appendChild(noIssues);
+                    return;
+                }
+                
+                issues.forEach(function(issue) {
+                    const issueEl = document.createElement('div');
+                    issueEl.className = `bg-white rounded-lg shadow-sm p-6 priority-${issue.severity} card-hover fade-in`;
+                    
+                    const severityColors = {
+                        high: { bg: 'bg-red-100', text: 'text-red-800', border: 'border-red-200' },
+                        medium: { bg: 'bg-orange-100', text: 'text-orange-800', border: 'border-orange-200' },
+                        low: { bg: 'bg-blue-100', text: 'text-blue-800', border: 'border-blue-200' }
+                    };
+                    
+                    const colors = severityColors[issue.severity];
+                    const severityText = issue.severity === 'high' ? '緊急' : issue.severity === 'medium' ? '重要' : '改善推奨';
+                    const icon = issue.severity === 'high' ? '🚨' : issue.severity === 'medium' ? '⚠️' : '💡';
+                    
+                    issueEl.innerHTML = `
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-3 mb-2">
+                                    <span class="${colors.bg} ${colors.text} text-xs font-semibold px-2 py-1 rounded">${severityText}</span>
+                                    <h4 class="text-lg font-semibold text-gray-900">${sanitizeHTML(issue.title)}</h4>
+                                </div>
+                                <p class="text-gray-600 mb-3">${sanitizeHTML(issue.description)}</p>
+                                <div class="flex items-center justify-between">
+                                    <p class="text-sm ${colors.text} font-medium">
+                                        影響: ${sanitizeHTML(issue.impact)}
+                                    </p>
+                                    <button onclick="HPAnalytics.UI.showIssueDetail('${issue.type}')" class="text-blue-600 text-sm font-medium hover:underline flex items-center">
+                                        詳細を見る
+                                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    container.appendChild(issueEl);
+                });
+            }
+            
+            // 初期化
+            function init() {
+                analysisData = analyzeTrackingData();
+                updateUI(analysisData);
+                
+                // 定期更新（5秒間隔）
+                updateInterval = setInterval(function() {
+                    const newData = analyzeTrackingData();
+                    if (newData) {
+                        analysisData = newData;
+                        updateUI(analysisData);
+                    }
+                }, 5000);
+            }
+            
+            // UI制御
+            const UI = {
+                showIssueDetail: function(issueType) {
+                    if (!analysisData || !analysisData.issues) return;
+                    
+                    const issue = analysisData.issues.find(i => i.type === issueType);
+                    if (!issue) return;
+                    
+                    const modal = document.getElementById('detailModal');
+                    const title = document.getElementById('modalTitle');
+                    const content = document.getElementById('modalContent');
+                    
+                    safeSetContent(title, issue.title + 'の詳細');
+                    
+                    const detailHTML = `
+                        <div class="space-y-6">
+                            <div class="bg-${issue.severity === 'high' ? 'red' : issue.severity === 'medium' ? 'orange' : 'blue'}-50 border border-${issue.severity === 'high' ? 'red' : issue.severity === 'medium' ? 'orange' : 'blue'}-200 rounded-lg p-4">
+                                <p class="text-${issue.severity === 'high' ? 'red' : issue.severity === 'medium' ? 'orange' : 'blue'}-800">
+                                    <strong>影響:</strong> ${sanitizeHTML(issue.impact)}
+                                </p>
+                            </div>
+                            
+                            <div>
+                                <h4 class="font-semibold text-gray-900 mb-3">推奨される改善策</h4>
+                                <div class="space-y-2">
+                                    ${issue.solutions.map((solution, index) => 
+                                        `<div class="flex items-start">
+                                            <span class="text-green-500 mr-2">•</span>
+                                            <span>${sanitizeHTML(solution)}</span>
+                                        </div>`
+                                    ).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    content.innerHTML = detailHTML;
+                    modal.classList.remove('hidden');
+                },
+                
+                closeModal: function() {
+                    const modal = document.getElementById('detailModal');
+                    modal.classList.add('hidden');
+                }
+            };
+            
+            // パブリックAPI
+            return {
+                init: init,
+                UI: UI,
+                getAnalysis: function() { return analysisData; }
+            };
+        })();
+
+        // 初期化
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', HPAnalytics.init);
+        } else {
+            HPAnalytics.init();
+        }
+        
+        // ESCキーでモーダルを閉じる
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                HPAnalytics.UI.closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

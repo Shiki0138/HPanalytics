@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HP改善分析システム - 収集データビューア</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Noto Sans JP', sans-serif; }
+        .json-viewer {
+            background: #1e293b;
+            color: #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem;
+            overflow-x: auto;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="max-w-6xl mx-auto p-6">
+        <!-- ヘッダー -->
+        <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-4">📊 収集データビューア</h1>
+            <p class="text-gray-600">
+                あなたのサイトから収集されたデータをリアルタイムで確認し、問題点を発見できます。
+            </p>
+        </div>
+
+        <!-- データ概要 -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white rounded-lg shadow-sm p-4">
+                <div class="text-sm text-gray-600 mb-1">総セッション数</div>
+                <div class="text-2xl font-bold text-gray-900" id="totalSessions">0</div>
+            </div>
+            <div class="bg-white rounded-lg shadow-sm p-4">
+                <div class="text-sm text-gray-600 mb-1">総ページビュー</div>
+                <div class="text-2xl font-bold text-gray-900" id="totalPageViews">0</div>
+            </div>
+            <div class="bg-white rounded-lg shadow-sm p-4">
+                <div class="text-sm text-gray-600 mb-1">フォーム離脱率</div>
+                <div class="text-2xl font-bold text-red-600" id="formAbandonRate">0%</div>
+            </div>
+            <div class="bg-white rounded-lg shadow-sm p-4">
+                <div class="text-sm text-gray-600 mb-1">平均滞在時間</div>
+                <div class="text-2xl font-bold text-blue-600" id="avgTimeOnPage">0秒</div>
+            </div>
+        </div>
+
+        <!-- 問題点の自動検出 -->
+        <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">🚨 検出された問題点</h2>
+            <div id="detectedIssues" class="space-y-4">
+                <div class="text-gray-500 text-center py-8">
+                    データを収集中です...
+                </div>
+            </div>
+        </div>
+
+        <!-- 詳細データビューア -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold text-gray-900">🔍 詳細データ</h2>
+                <div class="space-x-2">
+                    <button onclick="refreshData()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors">
+                        更新
+                    </button>
+                    <button onclick="clearData()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors">
+                        データクリア
+                    </button>
+                </div>
+            </div>
+            
+            <div class="json-viewer" id="rawDataViewer">
+                <pre>データがありません</pre>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // データ分析と表示
+        function analyzeData() {
+            const rawData = localStorage.getItem('hp_analytics_data');
+            
+            if (!rawData) {
+                document.getElementById('rawDataViewer').innerHTML = '<pre>データがありません。トラッキングタグを設置してサイトを閲覧してください。</pre>';
+                return;
+            }
+
+            try {
+                const data = JSON.parse(rawData);
+                
+                // 基本統計
+                const totalSessions = data.length;
+                const totalPageViews = data.reduce((sum, session) => sum + session.pageViews.length, 0);
+                
+                // フォーム分析
+                let formStarts = 0;
+                let formAbandons = 0;
+                data.forEach(session => {
+                    session.events.forEach(event => {
+                        if (event.name === 'form_start') formStarts++;
+                        if (event.name === 'form_abandon') formAbandons++;
+                    });
+                });
+                const formAbandonRate = formStarts > 0 ? Math.round((formAbandons / formStarts) * 100) : 0;
+                
+                // 平均滞在時間
+                let totalTime = 0;
+                let pageCount = 0;
+                data.forEach(session => {
+                    session.pageViews.forEach(pv => {
+                        if (pv.timeOnPage > 0) {
+                            totalTime += pv.timeOnPage;
+                            pageCount++;
+                        }
+                    });
+                });
+                const avgTimeOnPage = pageCount > 0 ? Math.round(totalTime / pageCount / 1000) : 0;
+                
+                // UI更新
+                document.getElementById('totalSessions').textContent = totalSessions;
+                document.getElementById('totalPageViews').textContent = totalPageViews;
+                document.getElementById('formAbandonRate').textContent = formAbandonRate + '%';
+                document.getElementById('avgTimeOnPage').textContent = avgTimeOnPage + '秒';
+                
+                // 問題点の検出
+                detectIssues(data, formAbandonRate, avgTimeOnPage);
+                
+                // 生データ表示
+                document.getElementById('rawDataViewer').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                
+            } catch (e) {
+                console.error('データ解析エラー:', e);
+                document.getElementById('rawDataViewer').innerHTML = '<pre class="text-red-400">データ解析エラー: ' + e.message + '</pre>';
+            }
+        }
+
+        // 問題点の自動検出
+        function detectIssues(data, formAbandonRate, avgTimeOnPage) {
+            const issues = [];
+            
+            // フォーム離脱率チェック
+            if (formAbandonRate > 50) {
+                issues.push({
+                    severity: 'high',
+                    title: 'フォーム離脱率が異常に高い',
+                    description: `フォーム離脱率が${formAbandonRate}%と非常に高くなっています。フォームの項目数削減や入力支援の実装を検討してください。`,
+                    impact: '問い合わせ数の大幅な機会損失'
+                });
+            }
+            
+            // エラー検出
+            let errorCount = 0;
+            data.forEach(session => {
+                errorCount += session.errors.length;
+            });
+            if (errorCount > 0) {
+                issues.push({
+                    severity: 'high',
+                    title: 'JavaScriptエラーが発生',
+                    description: `${errorCount}件のエラーが検出されました。ユーザー体験を著しく損なう可能性があります。`,
+                    impact: 'サイト機能の不具合による離脱'
+                });
+            }
+            
+            // ページ速度チェック
+            let slowPages = 0;
+            data.forEach(session => {
+                if (session.performance.loadTime > 3000) {
+                    slowPages++;
+                }
+            });
+            if (slowPages > 0) {
+                issues.push({
+                    severity: 'medium',
+                    title: 'ページ読み込みが遅い',
+                    description: `${slowPages}セッションで3秒以上の読み込み時間を記録。画像最適化やキャッシュ設定を見直してください。`,
+                    impact: '直帰率の増加'
+                });
+            }
+            
+            // 滞在時間チェック
+            if (avgTimeOnPage < 30 && avgTimeOnPage > 0) {
+                issues.push({
+                    severity: 'medium',
+                    title: '滞在時間が短い',
+                    description: `平均滞在時間が${avgTimeOnPage}秒と短く、コンテンツが十分に閲覧されていない可能性があります。`,
+                    impact: 'コンバージョン率の低下'
+                });
+            }
+            
+            // 問題点の表示
+            const issuesContainer = document.getElementById('detectedIssues');
+            if (issues.length === 0) {
+                issuesContainer.innerHTML = '<div class="text-green-600 text-center py-8">✅ 現在、重大な問題は検出されていません</div>';
+            } else {
+                issuesContainer.innerHTML = issues.map(issue => `
+                    <div class="border-l-4 ${issue.severity === 'high' ? 'border-red-500 bg-red-50' : 'border-orange-500 bg-orange-50'} p-4 rounded">
+                        <div class="flex items-start">
+                            <span class="text-2xl mr-3">${issue.severity === 'high' ? '🚨' : '⚠️'}</span>
+                            <div class="flex-1">
+                                <h3 class="font-bold text-gray-900">${issue.title}</h3>
+                                <p class="text-gray-700 mt-1">${issue.description}</p>
+                                <p class="text-sm ${issue.severity === 'high' ? 'text-red-600' : 'text-orange-600'} mt-2">
+                                    影響: ${issue.impact}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // データ更新
+        function refreshData() {
+            analyzeData();
+        }
+
+        // データクリア
+        function clearData() {
+            if (confirm('収集したデータをすべて削除しますか？')) {
+                localStorage.removeItem('hp_analytics_data');
+                analyzeData();
+            }
+        }
+
+        // 初期読み込み
+        document.addEventListener('DOMContentLoaded', () => {
+            analyzeData();
+            // 5秒ごとに自動更新
+            setInterval(analyzeData, 5000);
+        });
+    </script>
+</body>
+</html>
