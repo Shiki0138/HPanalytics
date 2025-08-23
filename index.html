@@ -3,157 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HP改善分析システム - サイトタイプ選択</title>
+    <title>HP改善分析システム</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap');
-        body { 
-            font-family: 'Noto Sans JP', sans-serif; 
-            background: #f8f9fa;
-        }
-        .card-hover {
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        .card-hover:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-        }
-        .gradient-text {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap');
+        * { font-family: 'Noto Sans JP', sans-serif; }
+        .hover-card:hover { transform: translateY(-4px); transition: all 0.3s; }
+        .gradient { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
     </style>
 </head>
-<body>
-    <div class="min-h-screen flex items-center justify-center p-4">
-        <div class="max-w-4xl w-full">
-            <!-- ヘッダー -->
+<body class="bg-gray-50">
+    <div class="min-h-screen py-12 px-4">
+        <div class="max-w-4xl mx-auto">
             <div class="text-center mb-12">
-                <h1 class="text-4xl font-bold gradient-text mb-4">HP改善分析システム</h1>
-                <p class="text-lg text-gray-600">
-                    あなたのサイトタイプを選択してください
-                </p>
-                <p class="text-sm text-gray-500 mt-2">
-                    サイトの種類に応じて、最適な分析と改善提案を行います
-                </p>
+                <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
+                    HP改善分析システム
+                </h1>
+                <p class="text-lg text-gray-600">サイトタイプを選択してください</p>
             </div>
 
-            <!-- サイトタイプ選択カード -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                
-                <!-- ECサイト -->
-                <div class="bg-white rounded-xl shadow-lg p-8 card-hover" onclick="selectSiteType('ec')">
-                    <div class="text-center mb-6">
-                        <div class="w-20 h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <span class="text-4xl">🛒</span>
-                        </div>
-                        <h2 class="text-2xl font-bold text-gray-800 mb-2">ECサイト</h2>
-                        <p class="text-gray-600">
-                            オンラインショップの売上最大化に特化した分析
-                        </p>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-white rounded-xl shadow-lg p-8 hover-card cursor-pointer" onclick="location.href='/ec'">
+                    <div class="w-16 h-16 gradient rounded-full flex items-center justify-center mx-auto mb-6">
+                        <span class="text-2xl">🛒</span>
                     </div>
-                    
-                    <div class="space-y-3 text-sm text-gray-600">
-                        <div class="flex items-center">
-                            <span class="text-green-500 mr-2">✓</span>
-                            <span>カート離脱率の詳細分析</span>
-                        </div>
-                        <div class="flex items-center">
-                            <span class="text-green-500 mr-2">✓</span>
-                            <span>商品ページの最適化提案</span>
-                        </div>
-                        <div class="flex items-center">
-                            <span class="text-green-500 mr-2">✓</span>
-                            <span>決済プロセスの改善点</span>
-                        </div>
-                        <div class="flex items-center">
-                            <span class="text-green-500 mr-2">✓</span>
-                            <span>売上向上施策の効果測定</span>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-6 p-4 bg-green-50 rounded-lg">
-                        <p class="text-sm text-green-700">
-                            <strong>平均改善効果:</strong> 売上 +30%、CVR +25%
-                        </p>
-                    </div>
+                    <h2 class="text-xl font-bold text-gray-800 text-center mb-4">ECサイト</h2>
+                    <p class="text-gray-600 text-center mb-4">売上最大化に特化した分析</p>
+                    <div class="text-sm text-green-600 text-center">平均効果: 売上+30%</div>
                 </div>
 
-                <!-- 企業サイト -->
-                <div class="bg-white rounded-xl shadow-lg p-8 card-hover" onclick="selectSiteType('corporate')">
-                    <div class="text-center mb-6">
-                        <div class="w-20 h-20 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <span class="text-4xl">🏢</span>
-                        </div>
-                        <h2 class="text-2xl font-bold text-gray-800 mb-2">企業サイト</h2>
-                        <p class="text-gray-600">
-                            リード獲得とブランディング強化を重視した分析
-                        </p>
+                <div class="bg-white rounded-xl shadow-lg p-8 hover-card cursor-pointer" onclick="location.href='/corporate'">
+                    <div class="w-16 h-16 gradient rounded-full flex items-center justify-center mx-auto mb-6">
+                        <span class="text-2xl">🏢</span>
                     </div>
-                    
-                    <div class="space-y-3 text-sm text-gray-600">
-                        <div class="flex items-center">
-                            <span class="text-blue-500 mr-2">✓</span>
-                            <span>お問い合わせ率の向上策</span>
-                        </div>
-                        <div class="flex items-center">
-                            <span class="text-blue-500 mr-2">✓</span>
-                            <span>ユーザー導線の最適化</span>
-                        </div>
-                        <div class="flex items-center">
-                            <span class="text-blue-500 mr-2">✓</span>
-                            <span>コンテンツの魅力度分析</span>
-                        </div>
-                        <div class="flex items-center">
-                            <span class="text-blue-500 mr-2">✓</span>
-                            <span>信頼性向上のための改善</span>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-6 p-4 bg-blue-50 rounded-lg">
-                        <p class="text-sm text-blue-700">
-                            <strong>平均改善効果:</strong> リード +45%、滞在時間 +35%
-                        </p>
-                    </div>
+                    <h2 class="text-xl font-bold text-gray-800 text-center mb-4">企業サイト</h2>
+                    <p class="text-gray-600 text-center mb-4">リード獲得とブランディング強化</p>
+                    <div class="text-sm text-blue-600 text-center">平均効果: リード+45%</div>
                 </div>
-
             </div>
 
-            <!-- その他のオプション -->
             <div class="mt-12 text-center">
-                <p class="text-gray-600 mb-6">その他のサイトタイプまたは機能</p>
                 <div class="flex flex-wrap justify-center gap-4">
-                    <button onclick="selectSiteType('dashboard')" class="px-6 py-3 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors">
+                    <button onclick="location.href='/dashboard'" class="px-6 py-3 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors">
                         📊 総合ダッシュボード
                     </button>
-                    <button onclick="selectSiteType('install')" class="px-6 py-3 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors">
+                    <button onclick="location.href='/install'" class="px-6 py-3 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors">
                         🔧 設置ガイド
                     </button>
-                    <button onclick="selectSiteType('analytics-viewer')" class="px-6 py-3 bg-teal-100 text-teal-700 rounded-lg hover:bg-teal-200 transition-colors">
+                    <button onclick="location.href='/analytics-viewer'" class="px-6 py-3 bg-teal-100 text-teal-700 rounded-lg hover:bg-teal-200 transition-colors">
                         📈 データビューア
                     </button>
                 </div>
             </div>
-
         </div>
     </div>
-
-    <script>
-        function selectSiteType(type) {
-            const routes = {
-                'ec': '/simple-analytics.html',
-                'corporate': '/corporate-analytics.html', 
-                'dashboard': '/production-dashboard.html',
-                'install': '/production-install.html',
-                'analytics-viewer': '/analytics-viewer.html'
-            };
-            
-            if (routes[type]) {
-                window.location.href = routes[type];
-            }
-        }
-    </script>
 </body>
 </html>
