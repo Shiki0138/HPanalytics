@@ -4,32 +4,28 @@
   "builds": [],
   "rewrites": [
     {
-      "source": "/",
-      "destination": "/index-simple.html"
-    },
-    {
       "source": "/ec",
-      "destination": "/simple-analytics.html"
+      "destination": "/public/simple-analytics.html"
     },
     {
       "source": "/corporate",
-      "destination": "/corporate-analytics.html"
+      "destination": "/public/corporate-analytics.html"
     },
     {
       "source": "/dashboard",
-      "destination": "/production-dashboard.html"
+      "destination": "/public/production-dashboard.html"
     },
     {
       "source": "/install",
-      "destination": "/production-install.html"
+      "destination": "/public/production-install.html"
     },
     {
       "source": "/tracking-tag.js",
-      "destination": "/tracking-tag-production.js"
+      "destination": "/public/tracking-tag-production.js"
     },
     {
       "source": "/analytics-viewer",
-      "destination": "/analytics-viewer.html"
+      "destination": "/public/analytics-viewer.html"
     }
   ],
   "headers": [
