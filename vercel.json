@@ -1,48 +1,35 @@
 {
   "version": 2,
-  "name": "hp-analytics-system",
   "public": true,
   "builds": [],
-  "routes": [
+  "rewrites": [
     {
-      "src": "/",
-      "dest": "/public/index-simple.html"
+      "source": "/",
+      "destination": "/index-simple.html"
     },
     {
-      "src": "/ec",
-      "dest": "/public/simple-analytics.html"
+      "source": "/ec",
+      "destination": "/simple-analytics.html"
     },
     {
-      "src": "/corporate",
-      "dest": "/public/corporate-analytics.html"
+      "source": "/corporate",
+      "destination": "/corporate-analytics.html"
     },
     {
-      "src": "/dashboard",
-      "dest": "/public/production-dashboard.html"
+      "source": "/dashboard",
+      "destination": "/production-dashboard.html"
     },
     {
-      "src": "/install",
-      "dest": "/public/production-install.html"
+      "source": "/install",
+      "destination": "/production-install.html"
     },
     {
-      "src": "/tracking-tag.js",
-      "dest": "/public/tracking-tag-production.js",
-      "headers": {
-        "Content-Type": "application/javascript",
-        "Cache-Control": "public, max-age=31536000, immutable"
-      }
+      "source": "/tracking-tag.js",
+      "destination": "/tracking-tag-production.js"
     },
     {
-      "src": "/analytics-viewer",
-      "dest": "/public/analytics-viewer.html"
-    },
-    {
-      "src": "/public/(.*)",
-      "dest": "/public/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/public/$1"
+      "source": "/analytics-viewer",
+      "destination": "/analytics-viewer.html"
     }
   ],
   "headers": [
