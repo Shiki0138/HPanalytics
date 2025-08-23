@@ -3,575 +3,473 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HP改善分析システム - シンプル版</title>
+    <title>ECサイト分析 - HP改善分析システム</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap');
-        body { 
-            font-family: 'Noto Sans JP', sans-serif; 
-            background: #f8f9fa;
+        * {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "Inter", sans-serif;
         }
-        .card-hover {
-            transition: all 0.3s ease;
-            cursor: pointer;
+        
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            min-height: 100vh;
         }
-        .card-hover:hover {
+        
+        .metric-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .metric-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1), 0 4px 10px rgba(0, 0, 0, 0.05);
         }
-        .priority-high { border-left: 4px solid #ef4444; }
-        .priority-medium { border-left: 4px solid #f59e0b; }
-        .priority-low { border-left: 4px solid #3b82f6; }
-        .fade-in {
-            animation: fadeIn 0.5s ease-in;
+        
+        .problem-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            border: 1px solid #f1f5f9;
+            transition: all 0.2s ease;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        
+        .problem-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
         }
-        .pulse-dot {
+        
+        .priority-urgent {
+            border-left: 4px solid #ef4444;
+            background: linear-gradient(135deg, #fef2f2 0%, #ffffff 100%);
+        }
+        
+        .priority-high {
+            border-left: 4px solid #f59e0b;
+            background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%);
+        }
+        
+        .priority-medium {
+            border-left: 4px solid #3b82f6;
+            background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+        }
+        
+        .metric-number {
+            font-variant-numeric: tabular-nums;
+            font-feature-settings: "tnum";
+        }
+        
+        .status-dot {
             animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: .5; }
+        
+        .fade-in {
+            animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        @keyframes fadeIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(20px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+        
+        .chart-bar {
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        .solution-tag {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .impact-badge {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.875rem;
         }
     </style>
 </head>
 <body>
-    <!-- シンプルなヘッダー -->
-    <header class="bg-white shadow-sm border-b border-gray-200">
-        <div class="max-w-6xl mx-auto px-6 py-4">
+    <!-- Modern Header -->
+    <header class="bg-white/80 backdrop-blur-md border-b border-gray-200/50 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                        <span class="text-white text-xl">🎯</span>
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-md">
+                        <span class="text-white text-xl">🛒</span>
                     </div>
                     <div>
-                        <h1 class="text-lg font-bold text-gray-900">HP改善分析システム</h1>
-                        <p class="text-xs text-gray-600">問題を見つけて、売上を最大化</p>
+                        <h1 class="text-xl font-bold text-gray-900">ECサイト分析</h1>
+                        <p class="text-sm text-gray-600">リアルタイム売上最適化</p>
                     </div>
                 </div>
-                <div class="flex items-center space-x-2">
-                    <div class="w-2 h-2 bg-green-500 rounded-full pulse-dot"></div>
-                    <span class="text-sm text-gray-600">リアルタイム分析中</span>
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-2 h-2 bg-green-500 rounded-full status-dot"></div>
+                        <span class="text-sm text-gray-600 font-medium">分析中</span>
+                    </div>
+                    <button onclick="window.location.href='/'" class="text-sm text-gray-600 hover:text-gray-900 font-medium">← 戻る</button>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- メインコンテンツ -->
-    <main class="max-w-6xl mx-auto px-6 py-8">
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
-        <!-- 現在の状態サマリー（超シンプル） -->
-        <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h2 class="text-2xl font-bold text-gray-900">現在の売上: ¥1,847,520</h2>
-                    <p class="text-gray-600 mt-1">前日比 <span class="text-green-600 font-semibold">+18.5%</span> | 目標達成率 <span class="text-blue-600 font-semibold">108%</span></p>
+        <!-- Key Metrics Dashboard -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 fade-in">
+            <!-- Today's Sales -->
+            <div class="metric-card rounded-2xl p-6">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-gray-600">今日の売上</span>
+                    <span class="text-2xl">💰</span>
                 </div>
-                <div class="text-right">
-                    <p class="text-sm text-gray-600">改善可能額</p>
-                    <p class="text-3xl font-bold text-purple-600">+¥580,000</p>
+                <div class="metric-number text-2xl font-bold text-gray-900 mb-1">¥1,847,520</div>
+                <div class="flex items-center space-x-2">
+                    <span class="text-sm text-green-600 font-semibold">+18.5%</span>
+                    <span class="text-xs text-gray-500">vs 昨日</span>
                 </div>
             </div>
-        </div>
-
-        <!-- 重要な問題点のみを表示 -->
-        <div class="mb-8">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <span class="text-red-500 mr-2">⚠️</span>
-                今すぐ対応が必要な問題点
-            </h3>
             
-            <div class="space-y-4">
-                <!-- 問題点1: 高優先度 -->
-                <div class="bg-white rounded-lg shadow-sm p-6 priority-high card-hover fade-in" onclick="showProblemDetail('cart-abandonment')">
-                    <div class="flex items-start justify-between">
-                        <div class="flex-1">
-                            <div class="flex items-center space-x-3 mb-2">
-                                <span class="bg-red-100 text-red-800 text-xs font-semibold px-2 py-1 rounded">緊急</span>
-                                <h4 class="text-lg font-semibold text-gray-900">カート離脱率が異常に高い</h4>
-                            </div>
-                            <p class="text-gray-600 mb-3">
-                                カートに商品を入れた後、<strong>68%のユーザーが購入せずに離脱</strong>しています。
-                                業界平均（45%）を大幅に上回っています。
-                            </p>
-                            <div class="flex items-center justify-between">
-                                <p class="text-sm text-red-600 font-medium">
-                                    推定損失額: ¥320,000/日
-                                </p>
-                                <button class="text-blue-600 text-sm font-medium hover:underline flex items-center">
-                                    詳細を見る
-                                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+            <!-- Conversion Rate -->
+            <div class="metric-card rounded-2xl p-6">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-gray-600">コンバージョン率</span>
+                    <span class="text-2xl">📈</span>
                 </div>
-
-                <!-- 問題点2: 中優先度 -->
-                <div class="bg-white rounded-lg shadow-sm p-6 priority-medium card-hover fade-in" style="animation-delay: 0.1s" onclick="showProblemDetail('mobile-performance')">
-                    <div class="flex items-start justify-between">
-                        <div class="flex-1">
-                            <div class="flex items-center space-x-3 mb-2">
-                                <span class="bg-orange-100 text-orange-800 text-xs font-semibold px-2 py-1 rounded">重要</span>
-                                <h4 class="text-lg font-semibold text-gray-900">モバイルページの読み込みが遅い</h4>
-                            </div>
-                            <p class="text-gray-600 mb-3">
-                                平均読み込み時間が<strong>4.2秒</strong>（推奨: 2秒以下）。
-                                モバイルユーザーの35%が離脱しています。
-                            </p>
-                            <div class="flex items-center justify-between">
-                                <p class="text-sm text-orange-600 font-medium">
-                                    推定損失額: ¥180,000/日
-                                </p>
-                                <button class="text-blue-600 text-sm font-medium hover:underline flex items-center">
-                                    詳細を見る
-                                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                <div class="metric-number text-2xl font-bold text-gray-900 mb-1">4.8%</div>
+                <div class="flex items-center space-x-2">
+                    <span class="text-sm text-red-600 font-semibold">-0.3%</span>
+                    <span class="text-xs text-gray-500">vs 先週</span>
                 </div>
-
-                <!-- 問題点3: 低優先度 -->
-                <div class="bg-white rounded-lg shadow-sm p-6 priority-low card-hover fade-in" style="animation-delay: 0.2s" onclick="showProblemDetail('search-optimization')">
-                    <div class="flex items-start justify-between">
-                        <div class="flex-1">
-                            <div class="flex items-center space-x-3 mb-2">
-                                <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-1 rounded">改善推奨</span>
-                                <h4 class="text-lg font-semibold text-gray-900">サイト内検索の精度が低い</h4>
-                            </div>
-                            <p class="text-gray-600 mb-3">
-                                検索を使用したユーザーの<strong>42%が目的の商品を見つけられず</strong>離脱。
-                                検索機能の改善で売上向上が期待できます。
-                            </p>
-                            <div class="flex items-center justify-between">
-                                <p class="text-sm text-blue-600 font-medium">
-                                    改善可能額: ¥80,000/日
-                                </p>
-                                <button class="text-blue-600 text-sm font-medium hover:underline flex items-center">
-                                    詳細を見る
-                                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+            </div>
+            
+            <!-- Cart Abandonment -->
+            <div class="metric-card rounded-2xl p-6">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-gray-600">カート離脱率</span>
+                    <span class="text-2xl">🛒</span>
                 </div>
+                <div class="metric-number text-2xl font-bold text-red-600 mb-1">68%</div>
+                <div class="flex items-center space-x-2">
+                    <span class="text-sm text-red-600 font-semibold">+12%</span>
+                    <span class="text-xs text-gray-500">業界平均超過</span>
+                </div>
+            </div>
+            
+            <!-- Improvement Potential -->
+            <div class="metric-card rounded-2xl p-6 bg-gradient-to-br from-purple-50 to-indigo-50 border-purple-200">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-purple-700">改善可能額</span>
+                    <span class="text-2xl">🚀</span>
+                </div>
+                <div class="metric-number text-2xl font-bold text-purple-700 mb-1">+¥580,000</div>
+                <div class="text-xs text-purple-600 font-medium">日間推定増収</div>
             </div>
         </div>
 
-        <!-- クイックアクション -->
-        <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">🚀 今すぐできる改善アクション</h3>
+        <!-- Critical Issues Section -->
+        <section class="mb-12">
+            <div class="flex items-center space-x-3 mb-6">
+                <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                    <span class="text-red-600 text-lg">⚠️</span>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900">優先対応が必要な問題</h2>
+                <span class="bg-red-100 text-red-800 text-xs font-semibold px-2 py-1 rounded-full">3件</span>
+            </div>
+            
+            <div class="space-y-6">
+                <!-- Problem 1: Cart Abandonment -->
+                <div class="problem-card priority-urgent p-6 cursor-pointer fade-in" onclick="showSolution('cart-abandonment')">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-3 mb-3">
+                                <span class="bg-red-100 text-red-800 text-xs font-bold px-3 py-1 rounded-full">緊急</span>
+                                <h3 class="text-lg font-semibold text-gray-900">カート離脱率が危険レベル</h3>
+                            </div>
+                            <p class="text-gray-700 mb-4">
+                                カートに商品を追加したユーザーの<strong class="text-red-600">68%が購入を完了していません</strong>。
+                                業界標準（45%）を23ポイント上回る深刻な状況です。
+                            </p>
+                            <div class="flex items-center space-x-4 mb-4">
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-sm text-gray-600">影響額:</span>
+                                    <span class="impact-badge">日額 ¥350,000 損失</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-sm text-gray-600">改善期間:</span>
+                                    <span class="text-sm font-semibold text-green-600">2-3日で効果</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="ml-6 text-center">
+                            <div class="text-3xl font-bold text-red-600 mb-1">68%</div>
+                            <div class="text-xs text-gray-500 mb-2">離脱率</div>
+                            <div class="w-16 h-2 bg-gray-200 rounded-full">
+                                <div class="w-11 h-2 bg-red-500 rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                        <div class="flex space-x-2">
+                            <span class="solution-tag">フォーム簡素化</span>
+                            <span class="solution-tag">送料最適化</span>
+                            <span class="solution-tag">信頼性向上</span>
+                        </div>
+                        <button class="text-blue-600 text-sm font-semibold hover:text-blue-800 transition-colors">
+                            解決策を見る →
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Problem 2: Mobile Performance -->
+                <div class="problem-card priority-high p-6 cursor-pointer fade-in" onclick="showSolution('mobile-speed')" style="animation-delay: 0.1s;">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-3 mb-3">
+                                <span class="bg-orange-100 text-orange-800 text-xs font-bold px-3 py-1 rounded-full">高</span>
+                                <h3 class="text-lg font-semibold text-gray-900">モバイル表示速度が遅すぎる</h3>
+                            </div>
+                            <p class="text-gray-700 mb-4">
+                                モバイルでの平均読み込み時間が<strong class="text-orange-600">4.2秒</strong>。
+                                Googleが推奨する3秒を大幅に超過しています。
+                            </p>
+                            <div class="flex items-center space-x-4 mb-4">
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-sm text-gray-600">影響額:</span>
+                                    <span class="impact-badge">日額 ¥150,000 損失</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-sm text-gray-600">改善期間:</span>
+                                    <span class="text-sm font-semibold text-green-600">1週間で効果</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="ml-6 text-center">
+                            <div class="text-3xl font-bold text-orange-600 mb-1">4.2s</div>
+                            <div class="text-xs text-gray-500 mb-2">読み込み時間</div>
+                            <div class="w-16 h-2 bg-gray-200 rounded-full">
+                                <div class="w-14 h-2 bg-orange-500 rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                        <div class="flex space-x-2">
+                            <span class="solution-tag">画像最適化</span>
+                            <span class="solution-tag">CDN導入</span>
+                            <span class="solution-tag">キャッシュ強化</span>
+                        </div>
+                        <button class="text-blue-600 text-sm font-semibold hover:text-blue-800 transition-colors">
+                            解決策を見る →
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Problem 3: Search Function -->
+                <div class="problem-card priority-medium p-6 cursor-pointer fade-in" onclick="showSolution('search-accuracy')" style="animation-delay: 0.2s;">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-3 mb-3">
+                                <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">中</span>
+                                <h3 class="text-lg font-semibold text-gray-900">サイト内検索の精度不足</h3>
+                            </div>
+                            <p class="text-gray-700 mb-4">
+                                検索結果の満足度が<strong class="text-blue-600">32%</strong>と低く、
+                                多くのユーザーが目的の商品を見つけられていません。
+                            </p>
+                            <div class="flex items-center space-x-4 mb-4">
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-sm text-gray-600">影響額:</span>
+                                    <span class="impact-badge">日額 ¥80,000 損失</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-sm text-gray-600">改善期間:</span>
+                                    <span class="text-sm font-semibold text-green-600">5日で効果</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="ml-6 text-center">
+                            <div class="text-3xl font-bold text-blue-600 mb-1">32%</div>
+                            <div class="text-xs text-gray-500 mb-2">満足度</div>
+                            <div class="w-16 h-2 bg-gray-200 rounded-full">
+                                <div class="w-5 h-2 bg-blue-500 rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                        <div class="flex space-x-2">
+                            <span class="solution-tag">AI検索導入</span>
+                            <span class="solution-tag">フィルター改善</span>
+                            <span class="solution-tag">提案機能</span>
+                        </div>
+                        <button class="text-blue-600 text-sm font-semibold hover:text-blue-800 transition-colors">
+                            解決策を見る →
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Actions -->
+        <section class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8 border border-blue-100">
+            <h2 class="text-xl font-bold text-gray-900 mb-6">今すぐできる改善アクション</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <button class="bg-white rounded-lg p-4 text-left hover:shadow-md transition-shadow" onclick="executeQuickFix('cart')">
-                    <div class="text-green-600 text-2xl mb-2">🛒</div>
-                    <h4 class="font-medium text-gray-900">カート改善</h4>
-                    <p class="text-sm text-gray-600 mt-1">ワンクリックで離脱防止策を実行</p>
-                    <p class="text-xs text-green-600 mt-2 font-medium">期待効果: +¥150,000/日</p>
+                <button onclick="quickFix('cart-optimization')" class="bg-white hover:bg-gray-50 p-4 rounded-xl border border-gray-200 text-left transition-all hover:shadow-md">
+                    <div class="text-lg mb-2">🛒 カート最適化</div>
+                    <div class="text-sm text-gray-600">フォーム項目を3つ削減</div>
+                    <div class="text-xs text-green-600 font-semibold mt-2">効果: +¥50,000/日</div>
                 </button>
                 
-                <button class="bg-white rounded-lg p-4 text-left hover:shadow-md transition-shadow" onclick="executeQuickFix('mobile')">
-                    <div class="text-blue-600 text-2xl mb-2">📱</div>
-                    <h4 class="font-medium text-gray-900">速度最適化</h4>
-                    <p class="text-sm text-gray-600 mt-1">画像圧縮とキャッシュ設定を自動化</p>
-                    <p class="text-xs text-blue-600 mt-2 font-medium">期待効果: +¥100,000/日</p>
+                <button onclick="quickFix('mobile-optimization')" class="bg-white hover:bg-gray-50 p-4 rounded-xl border border-gray-200 text-left transition-all hover:shadow-md">
+                    <div class="text-lg mb-2">📱 モバイル最適化</div>
+                    <div class="text-sm text-gray-600">画像圧縮を自動実行</div>
+                    <div class="text-xs text-green-600 font-semibold mt-2">効果: +¥30,000/日</div>
                 </button>
                 
-                <button class="bg-white rounded-lg p-4 text-left hover:shadow-md transition-shadow" onclick="executeQuickFix('search')">
-                    <div class="text-purple-600 text-2xl mb-2">🔍</div>
-                    <h4 class="font-medium text-gray-900">検索改善</h4>
-                    <p class="text-sm text-gray-600 mt-1">AI検索アルゴリズムを有効化</p>
-                    <p class="text-xs text-purple-600 mt-2 font-medium">期待効果: +¥50,000/日</p>
+                <button onclick="quickFix('search-improvement')" class="bg-white hover:bg-gray-50 p-4 rounded-xl border border-gray-200 text-left transition-all hover:shadow-md">
+                    <div class="text-lg mb-2">🔍 検索改善</div>
+                    <div class="text-sm text-gray-600">候補表示機能を追加</div>
+                    <div class="text-xs text-green-600 font-semibold mt-2">効果: +¥20,000/日</div>
                 </button>
             </div>
-        </div>
+        </section>
 
     </main>
 
-    <!-- 詳細モーダル（非表示） -->
-    <div id="detailModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50" onclick="closeModal()">
-        <div class="flex items-center justify-center min-h-screen p-4">
-            <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
-                <div id="modalContent" class="p-8">
-                    <!-- 動的にコンテンツを挿入 -->
-                </div>
+    <!-- Modal for detailed solutions -->
+    <div id="solutionModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div id="modalContent" class="p-8">
+                <!-- Modal content will be inserted here -->
             </div>
         </div>
     </div>
 
     <script>
-        // 問題の詳細データ
-        const problemDetails = {
-            'cart-abandonment': {
-                title: 'カート離脱率の詳細分析',
-                icon: '🛒',
-                severity: 'high',
-                content: `
-                    <div class="mb-6">
-                        <h3 class="text-2xl font-bold text-gray-900 mb-4">カート離脱の詳細分析結果</h3>
-                        
-                        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-                            <p class="text-red-800">
-                                <strong>緊急度: 最高</strong> - 毎日¥320,000の機会損失が発生しています
-                            </p>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                            <div>
-                                <h4 class="font-semibold text-gray-900 mb-3">📊 離脱の主な原因</h4>
-                                <ul class="space-y-2">
-                                    <li class="flex items-start">
-                                        <span class="text-red-500 mr-2">•</span>
-                                        <div>
-                                            <strong>予期しない送料（32%）</strong>
-                                            <p class="text-sm text-gray-600">最終画面で高額な送料が表示される</p>
-                                        </div>
-                                    </li>
-                                    <li class="flex items-start">
-                                        <span class="text-red-500 mr-2">•</span>
-                                        <div>
-                                            <strong>複雑な購入プロセス（28%）</strong>
-                                            <p class="text-sm text-gray-600">5ステップ以上の入力が必要</p>
-                                        </div>
-                                    </li>
-                                    <li class="flex items-start">
-                                        <span class="text-red-500 mr-2">•</span>
-                                        <div>
-                                            <strong>会員登録の強制（21%）</strong>
-                                            <p class="text-sm text-gray-600">ゲスト購入オプションがない</p>
-                                        </div>
-                                    </li>
-                                    <li class="flex items-start">
-                                        <span class="text-red-500 mr-2">•</span>
-                                        <div>
-                                            <strong>セキュリティへの不安（19%）</strong>
-                                            <p class="text-sm text-gray-600">SSL証明書の表示が不明確</p>
-                                        </div>
-                                    </li>
-                                </ul>
-                            </div>
-
-                            <div>
-                                <h4 class="font-semibold text-gray-900 mb-3">💡 推奨される改善策</h4>
-                                <div class="space-y-3">
-                                    <div class="bg-green-50 border border-green-200 rounded-lg p-3">
-                                        <h5 class="font-medium text-green-800">1. 送料の早期表示</h5>
-                                        <p class="text-sm text-green-700 mt-1">商品ページに送料を明記し、サプライズを防ぐ</p>
-                                        <p class="text-xs text-green-600 mt-2">実装時間: 30分 | 効果: +¥120,000/日</p>
-                                    </div>
-                                    
-                                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                                        <h5 class="font-medium text-blue-800">2. エクスプレスチェックアウト</h5>
-                                        <p class="text-sm text-blue-700 mt-1">購入ステップを3つに簡略化</p>
-                                        <p class="text-xs text-blue-600 mt-2">実装時間: 2時間 | 効果: +¥100,000/日</p>
-                                    </div>
-                                    
-                                    <div class="bg-purple-50 border border-purple-200 rounded-lg p-3">
-                                        <h5 class="font-medium text-purple-800">3. ゲスト購入オプション</h5>
-                                        <p class="text-sm text-purple-700 mt-1">会員登録なしでの購入を可能に</p>
-                                        <p class="text-xs text-purple-600 mt-2">実装時間: 1時間 | 効果: +¥80,000/日</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="bg-gray-50 rounded-lg p-6">
-                            <h4 class="font-semibold text-gray-900 mb-3">🎯 実装ロードマップ</h4>
-                            <div class="space-y-3">
-                                <div class="flex items-center justify-between p-3 bg-white rounded-lg">
-                                    <div class="flex items-center space-x-3">
-                                        <div class="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center font-bold">1</div>
-                                        <div>
-                                            <p class="font-medium">フェーズ1: 送料表示の改善（今日）</p>
-                                            <p class="text-sm text-gray-600">即効性が高く、実装も簡単</p>
-                                        </div>
-                                    </div>
-                                    <button class="bg-green-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-600 transition-colors">
-                                        今すぐ実行
-                                    </button>
-                                </div>
-                                
-                                <div class="flex items-center justify-between p-3 bg-white rounded-lg">
-                                    <div class="flex items-center space-x-3">
-                                        <div class="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold">2</div>
-                                        <div>
-                                            <p class="font-medium">フェーズ2: チェックアウト簡略化（明日）</p>
-                                            <p class="text-sm text-gray-600">UIの大幅改善で離脱率を削減</p>
-                                        </div>
-                                    </div>
-                                    <button class="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600 transition-colors">
-                                        スケジュール
-                                    </button>
-                                </div>
-                                
-                                <div class="flex items-center justify-between p-3 bg-white rounded-lg">
-                                    <div class="flex items-center space-x-3">
-                                        <div class="w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center font-bold">3</div>
-                                        <div>
-                                            <p class="font-medium">フェーズ3: ゲスト購入実装（今週中）</p>
-                                            <p class="text-sm text-gray-600">新規顧客の購入ハードルを下げる</p>
-                                        </div>
-                                    </div>
-                                    <button class="bg-purple-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-purple-600 transition-colors">
-                                        計画する
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `
-            },
-            'mobile-performance': {
-                title: 'モバイルパフォーマンスの詳細分析',
-                icon: '📱',
-                severity: 'medium',
-                content: `
-                    <div class="mb-6">
-                        <h3 class="text-2xl font-bold text-gray-900 mb-4">モバイルパフォーマンスの詳細分析</h3>
-                        
-                        <div class="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6">
-                            <p class="text-orange-800">
-                                <strong>重要度: 高</strong> - モバイルユーザーの35%が離脱し、¥180,000/日の損失
-                            </p>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                            <div>
-                                <h4 class="font-semibold text-gray-900 mb-3">🐌 遅延の原因分析</h4>
-                                <div class="space-y-3">
-                                    <div class="bg-white border border-gray-200 rounded-lg p-3">
-                                        <div class="flex justify-between items-center mb-2">
-                                            <span class="font-medium">画像の最適化不足</span>
-                                            <span class="text-red-600 font-bold">2.1秒</span>
-                                        </div>
-                                        <div class="w-full bg-gray-200 rounded-full h-2">
-                                            <div class="bg-red-500 h-2 rounded-full" style="width: 50%"></div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="bg-white border border-gray-200 rounded-lg p-3">
-                                        <div class="flex justify-between items-center mb-2">
-                                            <span class="font-medium">JavaScriptの実行</span>
-                                            <span class="text-orange-600 font-bold">1.3秒</span>
-                                        </div>
-                                        <div class="w-full bg-gray-200 rounded-full h-2">
-                                            <div class="bg-orange-500 h-2 rounded-full" style="width: 31%"></div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="bg-white border border-gray-200 rounded-lg p-3">
-                                        <div class="flex justify-between items-center mb-2">
-                                            <span class="font-medium">サーバー応答時間</span>
-                                            <span class="text-yellow-600 font-bold">0.8秒</span>
-                                        </div>
-                                        <div class="w-full bg-gray-200 rounded-full h-2">
-                                            <div class="bg-yellow-500 h-2 rounded-full" style="width: 19%"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div>
-                                <h4 class="font-semibold text-gray-900 mb-3">⚡ 最適化プラン</h4>
-                                <div class="space-y-3">
-                                    <div class="bg-green-50 border border-green-200 rounded-lg p-3">
-                                        <h5 class="font-medium text-green-800">画像の自動最適化</h5>
-                                        <ul class="text-sm text-green-700 mt-2 space-y-1">
-                                            <li>• WebP形式への自動変換</li>
-                                            <li>• 遅延読み込みの実装</li>
-                                            <li>• レスポンシブ画像の配信</li>
-                                        </ul>
-                                        <p class="text-xs text-green-600 mt-2 font-medium">削減時間: -1.5秒</p>
-                                    </div>
-                                    
-                                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                                        <h5 class="font-medium text-blue-800">コード最適化</h5>
-                                        <ul class="text-sm text-blue-700 mt-2 space-y-1">
-                                            <li>• 不要なJSの削除</li>
-                                            <li>• コード分割の実装</li>
-                                            <li>• キャッシュ戦略の改善</li>
-                                        </ul>
-                                        <p class="text-xs text-blue-600 mt-2 font-medium">削減時間: -0.8秒</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="bg-gray-50 rounded-lg p-6">
-                            <h4 class="font-semibold text-gray-900 mb-3">📈 期待される改善効果</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div class="bg-white rounded-lg p-4 text-center">
-                                    <div class="text-3xl font-bold text-green-600">2.0秒</div>
-                                    <p class="text-sm text-gray-600 mt-1">目標読み込み時間</p>
-                                    <p class="text-xs text-gray-500 mt-1">現在: 4.2秒</p>
-                                </div>
-                                <div class="bg-white rounded-lg p-4 text-center">
-                                    <div class="text-3xl font-bold text-blue-600">-52%</div>
-                                    <p class="text-sm text-gray-600 mt-1">離脱率の改善</p>
-                                    <p class="text-xs text-gray-500 mt-1">35% → 17%</p>
-                                </div>
-                                <div class="bg-white rounded-lg p-4 text-center">
-                                    <div class="text-3xl font-bold text-purple-600">+¥180,000</div>
-                                    <p class="text-sm text-gray-600 mt-1">売上増加/日</p>
-                                    <p class="text-xs text-gray-500 mt-1">年間: +¥6,570万</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `
-            },
-            'search-optimization': {
-                title: 'サイト内検索の最適化',
-                icon: '🔍',
-                severity: 'low',
-                content: `
-                    <div class="mb-6">
-                        <h3 class="text-2xl font-bold text-gray-900 mb-4">サイト内検索の最適化分析</h3>
-                        
-                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                            <p class="text-blue-800">
-                                <strong>改善推奨</strong> - 検索機能の改善で¥80,000/日の売上向上が可能
-                            </p>
-                        </div>
-
-                        <div class="mb-6">
-                            <h4 class="font-semibold text-gray-900 mb-3">🔍 現在の検索パフォーマンス</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="bg-white border border-gray-200 rounded-lg p-4">
-                                    <h5 class="font-medium text-gray-800 mb-3">検索クエリ分析</h5>
-                                    <div class="space-y-2">
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-sm">完全一致率</span>
-                                            <span class="font-bold text-red-600">23%</span>
-                                        </div>
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-sm">部分一致率</span>
-                                            <span class="font-bold text-orange-600">35%</span>
-                                        </div>
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-sm">検索失敗率</span>
-                                            <span class="font-bold text-red-600">42%</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="bg-white border border-gray-200 rounded-lg p-4">
-                                    <h5 class="font-medium text-gray-800 mb-3">ユーザー行動</h5>
-                                    <div class="space-y-2">
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-sm">検索後の購入率</span>
-                                            <span class="font-bold text-green-600">12%</span>
-                                        </div>
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-sm">再検索率</span>
-                                            <span class="font-bold text-orange-600">67%</span>
-                                        </div>
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-sm">検索後の離脱率</span>
-                                            <span class="font-bold text-red-600">42%</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mb-6">
-                            <h4 class="font-semibold text-gray-900 mb-3">💡 AI検索導入による改善案</h4>
-                            <div class="space-y-3">
-                                <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-                                    <h5 class="font-medium text-green-800">1. 自然言語処理の導入</h5>
-                                    <p class="text-sm text-green-700 mt-1">
-                                        「赤いワンピース 夏用」のような自然な検索に対応
-                                    </p>
-                                    <p class="text-xs text-green-600 mt-2">効果: 検索成功率 +45%</p>
-                                </div>
-                                
-                                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                    <h5 class="font-medium text-blue-800">2. 類似商品の自動提案</h5>
-                                    <p class="text-sm text-blue-700 mt-1">
-                                        検索結果が少ない場合、関連商品を自動表示
-                                    </p>
-                                    <p class="text-xs text-blue-600 mt-2">効果: 離脱率 -30%</p>
-                                </div>
-                                
-                                <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                                    <h5 class="font-medium text-purple-800">3. 検索履歴の学習機能</h5>
-                                    <p class="text-sm text-purple-700 mt-1">
-                                        ユーザーの検索傾向を学習し、精度を向上
-                                    </p>
-                                    <p class="text-xs text-purple-600 mt-2">効果: リピート購入率 +25%</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="bg-gray-50 rounded-lg p-6">
-                            <h4 class="font-semibold text-gray-900 mb-3">🚀 実装の優先順位</h4>
-                            <p class="text-sm text-gray-600 mb-3">
-                                他の改善項目と比較して優先度は低めですが、長期的な顧客満足度向上に寄与します。
-                            </p>
-                            <button class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors">
-                                AI検索の導入計画を作成
-                            </button>
-                        </div>
-                    </div>
-                `
-            }
-        };
-
-        // 問題の詳細を表示
-        function showProblemDetail(problemId) {
-            const detail = problemDetails[problemId];
-            if (!detail) return;
-
-            const modalContent = document.getElementById('modalContent');
-            modalContent.innerHTML = detail.content;
-            
-            document.getElementById('detailModal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-
-        // モーダルを閉じる
-        function closeModal() {
-            document.getElementById('detailModal').classList.add('hidden');
-            document.body.style.overflow = 'auto';
-        }
-
-        // クイックフィックスの実行
-        function executeQuickFix(type) {
-            const fixes = {
-                'cart': {
-                    title: 'カート改善の実行',
-                    message: 'カート離脱防止策を実行中...\n\n✅ 送料の早期表示を有効化\n✅ 購入ステップを簡略化\n✅ 離脱防止ポップアップを設定\n\n予想効果: +¥150,000/日'
+        'use strict';
+        
+        // Show detailed solution
+        function showSolution(problemId) {
+            const solutions = {
+                'cart-abandonment': {
+                    title: 'カート離脱率改善ソリューション',
+                    impact: '日額 ¥350,000 増収見込み',
+                    timeframe: '実装期間: 2-3日',
+                    actions: [
+                        { action: '必須項目を7項目から4項目に削減', impact: '+15%コンバージョン' },
+                        { action: '送料を商品価格に統合表示', impact: '+8%完了率' },
+                        { action: 'セキュリティバッジを追加表示', impact: '+5%信頼性' },
+                        { action: 'ゲスト購入オプションを追加', impact: '+12%新規顧客' }
+                    ]
                 },
-                'mobile': {
-                    title: 'モバイル最適化の実行',
-                    message: '画像圧縮とキャッシュ設定を実行中...\n\n✅ 画像をWebP形式に自動変換\n✅ 遅延読み込みを有効化\n✅ ブラウザキャッシュを最適化\n\n予想効果: +¥100,000/日'
+                'mobile-speed': {
+                    title: 'モバイル表示速度改善',
+                    impact: '日額 ¥150,000 増収見込み',
+                    timeframe: '実装期間: 1週間',
+                    actions: [
+                        { action: '画像フォーマットをWebPに変更', impact: '読み込み時間-40%' },
+                        { action: 'CDNを導入してキャッシュ強化', impact: '応答時間-60%' },
+                        { action: '不要なJavaScriptライブラリ削除', impact: 'ファイルサイズ-30%' },
+                        { action: '遅延読み込み（Lazy Loading）実装', impact: '初期表示-50%' }
+                    ]
                 },
-                'search': {
-                    title: 'AI検索の有効化',
-                    message: 'AI検索アルゴリズムを有効化中...\n\n✅ 自然言語処理エンジンを起動\n✅ 類似商品の自動提案を有効化\n✅ 検索履歴の学習を開始\n\n予想効果: +¥50,000/日'
+                'search-accuracy': {
+                    title: 'サイト内検索精度向上',
+                    impact: '日額 ¥80,000 増収見込み',
+                    timeframe: '実装期間: 5日',
+                    actions: [
+                        { action: 'AI搭載検索エンジンの導入', impact: '検索精度+45%' },
+                        { action: 'オートコンプリート機能追加', impact: 'ユーザビリティ+30%' },
+                        { action: '商品フィルター機能強化', impact: '絞り込み効率+25%' },
+                        { action: 'おすすめ商品表示機能', impact: '平均注文額+15%' }
+                    ]
                 }
             };
-
-            const fix = fixes[type];
-            if (fix && confirm(`${fix.title}\n\n実行してもよろしいですか？`)) {
-                alert(fix.message);
-            }
+            
+            const solution = solutions[problemId];
+            if (!solution) return;
+            
+            const modalContent = document.getElementById('modalContent');
+            modalContent.innerHTML = `
+                <div class="flex items-start justify-between mb-6">
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2">${solution.title}</h3>
+                        <div class="flex items-center space-x-4">
+                            <span class="impact-badge">${solution.impact}</span>
+                            <span class="text-sm text-gray-600">${solution.timeframe}</span>
+                        </div>
+                    </div>
+                    <button onclick="closeSolutionModal()" class="text-gray-400 hover:text-gray-600 text-2xl">×</button>
+                </div>
+                
+                <div class="space-y-4 mb-6">
+                    ${solution.actions.map(item => `
+                        <div class="bg-gray-50 p-4 rounded-xl">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <h4 class="font-semibold text-gray-900 mb-1">${item.action}</h4>
+                                    <div class="text-sm text-green-600 font-medium">${item.impact}</div>
+                                </div>
+                                <button class="text-blue-600 text-sm font-medium hover:text-blue-800">実装 →</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div class="flex space-x-3">
+                    <button onclick="implementSolution('${problemId}')" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 transition-colors flex-1">
+                        今すぐ実装開始
+                    </button>
+                    <button onclick="scheduleSolution('${problemId}')" class="bg-gray-100 text-gray-700 px-6 py-3 rounded-xl font-semibold hover:bg-gray-200 transition-colors">
+                        後で実装
+                    </button>
+                </div>
+            `;
+            
+            document.getElementById('solutionModal').classList.remove('hidden');
         }
-
-        // ESCキーでモーダルを閉じる
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeModal();
+        
+        function closeSolutionModal() {
+            document.getElementById('solutionModal').classList.add('hidden');
+        }
+        
+        function quickFix(type) {
+            alert(`${type} の自動最適化を開始しました。結果は5分後に反映されます。`);
+        }
+        
+        function implementSolution(problemId) {
+            alert(`${problemId} の解決策実装を開始しました。進捗はダッシュボードで確認できます。`);
+            closeSolutionModal();
+        }
+        
+        function scheduleSolution(problemId) {
+            alert(`${problemId} の実装がスケジュールされました。`);
+            closeSolutionModal();
+        }
+        
+        // Close modal on outside click
+        document.getElementById('solutionModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeSolutionModal();
             }
         });
     </script>
