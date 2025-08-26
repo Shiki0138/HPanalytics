@@ -167,7 +167,7 @@
                                id="siteUrl" 
                                placeholder="https://example.com" 
                                class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <button id="generateBtn" 
+                        <button onclick="generateSiteId()" 
                                 class="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
                             生成
                         </button>
@@ -191,7 +191,7 @@
                 </div>
                 
                 <div class="code-block">
-                    <button class="copy-button" id="copyBtn">コピー</button>
+                    <button class="copy-button" onclick="copyCode('trackingCode')">コピー</button>
                     <pre id="trackingCode">&lt;!-- HP改善分析システム --&gt;
 &lt;script&gt;
 (function(){
@@ -202,7 +202,7 @@
         window.HPAnalytics.config.siteId = '<span id="siteIdPlaceholder">YOUR_SITE_ID</span>';
         window.HPAnalytics.config.debug = false;
     };
-    document.head.appendChild(script);
+    document.body.appendChild(script);
 })();
 &lt;/script&gt;</pre>
                 </div>
@@ -239,7 +239,7 @@
                     </div>
                 </div>
                 
-                <button id="verifyBtn" 
+                <button onclick="verifyInstallation()" 
                         class="w-full bg-green-600 text-white py-3 rounded-xl font-semibold hover:bg-green-700 transition-colors">
                     動作確認を実行
                 </button>
@@ -323,7 +323,7 @@
         }
         
         function sanitizeInput(input) {
-            if (typeof input !== 'string') return '';
+            // Remove any script tags and dangerous characters
             return input.replace(/<script[^>]*>.*?<\/script>/gi, '')
                        .replace(/[<>'"&]/g, (char) => {
                            const entityMap = {
@@ -333,10 +333,10 @@
                                "'": '&#39;',
                                '&': '&amp;'
                            };
-                           return entityMap[char] || char;
+                           return entityMap[char];
                        })
                        .trim()
-                       .substring(0, 2048);
+                       .substring(0, 2048); // Limit length
         }
         
         function validateSiteUrl(url) {
@@ -374,7 +374,7 @@
             const timestamp = Date.now();
             const random = Math.random().toString(36).substring(2, 8);
             const urlHash = btoa(validation.url).substring(0, 8).replace(/[^a-zA-Z0-9]/g, '');
-            const siteId = 'site_' + timestamp + '_' + random + '_' + urlHash;
+            const siteId = `site_${timestamp}_${random}_${urlHash}`;
             
             // Validate generated siteId
             if (!/^[a-zA-Z0-9_]+$/.test(siteId)) {
@@ -390,7 +390,7 @@
             document.getElementById('siteIdPlaceholder').textContent = siteId;
             
             // Smooth scroll to next step
-            setTimeout(function() {
+            setTimeout(() => {
                 const nextStep = document.querySelector('.step-card:nth-child(2)');
                 if (nextStep) {
                     nextStep.scrollIntoView({ 
@@ -402,39 +402,20 @@
         }
         
         // Copy tracking code
-        function copyCode() {
-            const codeElement = document.getElementById('trackingCode');
+        function copyCode(elementId) {
+            const codeElement = document.getElementById(elementId);
             const textToCopy = codeElement.textContent;
             
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(textToCopy).then(function() {
-                    const button = document.getElementById('copyBtn');
-                    button.textContent = 'コピー完了!';
-                    button.classList.add('copied');
-                    
-                    setTimeout(function() {
-                        button.textContent = 'コピー';
-                        button.classList.remove('copied');
-                    }, 2000);
-                });
-            } else {
-                // Fallback for older browsers
-                const textArea = document.createElement('textarea');
-                textArea.value = textToCopy;
-                document.body.appendChild(textArea);
-                textArea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textArea);
-                
-                const button = document.getElementById('copyBtn');
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const button = event.target;
                 button.textContent = 'コピー完了!';
                 button.classList.add('copied');
                 
-                setTimeout(function() {
+                setTimeout(() => {
                     button.textContent = 'コピー';
                     button.classList.remove('copied');
                 }, 2000);
-            }
+            });
         }
         
         // Verify installation
@@ -443,7 +424,7 @@
             const checks = ['check1', 'check2', 'check3'];
             let allChecked = true;
             
-            checks.forEach(function(id) {
+            checks.forEach(id => {
                 if (!document.getElementById(id).checked) {
                     allChecked = false;
                 }
@@ -453,55 +434,26 @@
                 alert('✅ 設置が正常に完了しました！ダッシュボードで分析結果を確認できます。');
                 
                 // Auto-check all items
-                checks.forEach(function(id) {
+                checks.forEach(id => {
                     document.getElementById(id).checked = true;
                 });
                 
                 // Scroll to dashboard section
-                setTimeout(function() {
-                    const dashboardStep = document.querySelector('.step-card:nth-child(4)');
-                    if (dashboardStep) {
-                        dashboardStep.scrollIntoView({ 
-                            behavior: 'smooth', 
-                            block: 'center' 
-                        });
-                    }
+                setTimeout(() => {
+                    document.querySelector('.step-card:nth-child(4)').scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'center' 
+                    });
                 }, 500);
             } else {
                 alert('⚠️ すべての項目を確認してください。問題がある場合はサポートにお問い合わせください。');
             }
         }
         
-        // Event listeners
-        document.addEventListener('DOMContentLoaded', function() {
-            // Generate button
-            const generateBtn = document.getElementById('generateBtn');
-            if (generateBtn) {
-                generateBtn.addEventListener('click', generateSiteId);
-            }
-            
-            // Copy button
-            const copyBtn = document.getElementById('copyBtn');
-            if (copyBtn) {
-                copyBtn.addEventListener('click', copyCode);
-            }
-            
-            // Verify button
-            const verifyBtn = document.getElementById('verifyBtn');
-            if (verifyBtn) {
-                verifyBtn.addEventListener('click', verifyInstallation);
-            }
-            
-            // Enter key support for URL input
-            const siteUrlInput = document.getElementById('siteUrl');
-            if (siteUrlInput) {
-                siteUrlInput.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        generateSiteId();
-                    }
-                });
-            }
-        });
+        // Ensure functions are globally accessible for onclick handlers
+        window.generateSiteId = generateSiteId;
+        window.copyCode = copyCode;
+        window.verifyInstallation = verifyInstallation;
     </script>
 </body>
 </html>
