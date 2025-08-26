@@ -449,6 +449,11 @@
                 alert('⚠️ すべての項目を確認してください。問題がある場合はサポートにお問い合わせください。');
             }
         }
+        
+        // Ensure functions are globally accessible for onclick handlers
+        window.generateSiteId = generateSiteId;
+        window.copyCode = copyCode;
+        window.verifyInstallation = verifyInstallation;
     </script>
 </body>
 </html>
