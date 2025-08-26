@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>設置ガイド - HP改善分析システム</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * { font-family: "Inter", sans-serif; }
+        body { background-color: #f8fafc; }
+        .step-card { 
+            background: white; 
+            border-radius: 16px; 
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06); 
+            border: 1px solid #f1f5f9; 
+            transition: all 0.2s ease; 
+        }
+        .step-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); }
+        .code-block {
+            background: #1e293b; color: #e2e8f0; border-radius: 12px; padding: 1.5rem;
+            overflow-x: auto; position: relative; font-family: monospace; font-size: 14px; line-height: 1.6;
+        }
+        .copy-button {
+            position: absolute; top: 12px; right: 12px; background: #475569; color: white;
+            border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px;
+            cursor: pointer; transition: all 0.2s; font-weight: 500;
+        }
+        .copy-button:hover { background: #10b981; }
+        .copy-button.copied { background: #10b981; }
+        .step-number {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white;
+            width: 40px; height: 40px; border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; font-weight: bold; font-size: 18px; flex-shrink: 0;
+        }
+    </style>
+</head>
+<body>
+    <header class="bg-white border-b border-gray-200">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center shadow-md">
+                        <span class="text-white text-xl">🔧</span>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-900">設置ガイド（緊急修正版）</h1>
+                        <p class="text-sm text-gray-600">5分で完了する簡単セットアップ</p>
+                    </div>
+                </div>
+                <button onclick="window.location.href='/'" class="text-sm text-gray-600 hover:text-gray-900 font-medium">← 戻る</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8 mb-12 border border-blue-100">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">🚀 HP改善分析システムをあなたのサイトに導入</h2>
+            <p class="text-gray-700 mb-6">わずか5分で設置完了。リアルタイムで問題を検出し、売上向上のための具体的な改善策を提供します。</p>
+        </div>
+
+        <div class="space-y-8">
+            <!-- Step 1: Generate Site ID -->
+            <div class="step-card p-8">
+                <div class="flex items-start mb-6">
+                    <div class="step-number mr-4">1</div>
+                    <div class="flex-1">
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">サイトIDを生成</h3>
+                        <p class="text-gray-600">まず、あなたのサイト専用のIDを生成します。</p>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 p-6 rounded-xl mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">サイトURL</label>
+                    <div class="flex space-x-3">
+                        <input type="url" id="siteUrl" placeholder="https://example.com" 
+                               class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <button id="generateBtnFix" 
+                                class="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                            生成
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="siteIdResult" class="hidden bg-green-50 border border-green-200 rounded-xl p-4">
+                    <p class="text-sm text-green-800 mb-2">✅ サイトIDが生成されました</p>
+                    <div class="font-mono text-lg font-bold text-green-900" id="generatedSiteId">site_xxxxxxxx</div>
+                </div>
+            </div>
+
+            <!-- Step 2: Install Tracking Code -->
+            <div class="step-card p-8">
+                <div class="flex items-start mb-6">
+                    <div class="step-number mr-4">2</div>
+                    <div class="flex-1">
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">トラッキングコードを設置</h3>
+                        <p class="text-gray-600">以下のコードをあなたのサイトの &lt;/body&gt; タグの直前に貼り付けてください。</p>
+                    </div>
+                </div>
+                
+                <div class="code-block">
+                    <button class="copy-button" id="copyBtnFix">コピー</button>
+                    <pre id="trackingCode">&lt;!-- HP改善分析システム --&gt;
+&lt;script&gt;
+(function(){
+    var script = document.createElement('script');
+    script.src = 'https://hp-analytics-system.vercel.app/tracking-tag-production.js';
+    script.async = true;
+    script.onload = function() {
+        window.HPAnalytics.config.siteId = '<span id="siteIdPlaceholder">YOUR_SITE_ID</span>';
+        window.HPAnalytics.config.debug = false;
+    };
+    document.head.appendChild(script);
+})();
+&lt;/script&gt;</pre>
+                </div>
+            </div>
+
+            <!-- Step 3: 簡易確認 -->
+            <div class="step-card p-8">
+                <div class="flex items-start mb-6">
+                    <div class="step-number mr-4">3</div>
+                    <div class="flex-1">
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">設置完了</h3>
+                        <p class="text-gray-600">コードを貼り付けたら、ダッシュボードで分析結果を確認できます。</p>
+                    </div>
+                </div>
+                
+                <button onclick="window.location.href='/simple-analytics'" 
+                        class="w-full bg-green-600 text-white py-3 rounded-xl font-semibold hover:bg-green-700 transition-colors">
+                    ダッシュボードを開く →
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- EMERGENCY JAVASCRIPT FIX -->
+    <script>
+        console.log('Emergency fix script loading...');
+        
+        function generateSiteId() {
+            console.log('generateSiteId called');
+            
+            const urlInput = document.getElementById('siteUrl');
+            const url = urlInput ? urlInput.value : '';
+            
+            if (!url) {
+                alert('URLを入力してください');
+                return;
+            }
+            
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                alert('有効なURLを入力してください（http://またはhttps://で開始）');
+                return;
+            }
+            
+            // Generate unique ID
+            const timestamp = Date.now();
+            const random = Math.random().toString(36).substring(2, 8);
+            const siteId = 'site_' + timestamp + '_' + random;
+            
+            console.log('Generated site ID:', siteId);
+            
+            // Show result
+            const resultDiv = document.getElementById('siteIdResult');
+            const idDisplay = document.getElementById('generatedSiteId');
+            const placeholder = document.getElementById('siteIdPlaceholder');
+            
+            if (resultDiv) resultDiv.classList.remove('hidden');
+            if (idDisplay) idDisplay.textContent = siteId;
+            if (placeholder) placeholder.textContent = siteId;
+            
+            console.log('Site ID generated successfully');
+        }
+        
+        function copyCode() {
+            console.log('copyCode called');
+            
+            const codeElement = document.getElementById('trackingCode');
+            if (!codeElement) {
+                alert('コードが見つかりません');
+                return;
+            }
+            
+            const textToCopy = codeElement.textContent;
+            
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(textToCopy).then(function() {
+                    const button = document.getElementById('copyBtnFix');
+                    if (button) {
+                        button.textContent = 'コピー完了!';
+                        button.classList.add('copied');
+                        
+                        setTimeout(function() {
+                            button.textContent = 'コピー';
+                            button.classList.remove('copied');
+                        }, 2000);
+                    }
+                }).catch(function(err) {
+                    console.error('Copy failed:', err);
+                    alert('コピーに失敗しました。手動でコピーしてください。');
+                });
+            } else {
+                // Fallback
+                const textArea = document.createElement('textarea');
+                textArea.value = textToCopy;
+                document.body.appendChild(textArea);
+                textArea.select();
+                
+                try {
+                    document.execCommand('copy');
+                    const button = document.getElementById('copyBtnFix');
+                    if (button) {
+                        button.textContent = 'コピー完了!';
+                        setTimeout(function() {
+                            button.textContent = 'コピー';
+                        }, 2000);
+                    }
+                } catch (err) {
+                    alert('コピーに失敗しました。手動でコピーしてください。');
+                }
+                
+                document.body.removeChild(textArea);
+            }
+        }
+        
+        // Make functions globally available
+        window.generateSiteId = generateSiteId;
+        window.copyCode = copyCode;
+        
+        // Setup event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, setting up event listeners...');
+            
+            const generateBtn = document.getElementById('generateBtnFix');
+            if (generateBtn) {
+                generateBtn.addEventListener('click', generateSiteId);
+                console.log('Generate button listener added');
+            } else {
+                console.error('Generate button not found');
+            }
+            
+            const copyBtn = document.getElementById('copyBtnFix');
+            if (copyBtn) {
+                copyBtn.addEventListener('click', copyCode);
+                console.log('Copy button listener added');
+            } else {
+                console.error('Copy button not found');
+            }
+            
+            const urlInput = document.getElementById('siteUrl');
+            if (urlInput) {
+                urlInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        generateSiteId();
+                    }
+                });
+                console.log('URL input Enter key listener added');
+            }
+            
+            console.log('All event listeners setup complete');
+        });
+        
+        console.log('Emergency fix script loaded successfully');
+    </script>
+</body>
+</html>
