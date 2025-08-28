@@ -41,34 +41,52 @@ class AIAdaptiveSystem {
 
     setupEventListeners() {
         // Track user interactions for AI learning
-        document.addEventListener('click', (e) => {
-            this.recordInteraction('click', e);
-            this.createRippleEffect(e);
-        });
-
-        document.addEventListener('mouseover', (e) => {
-            this.recordInteraction('hover', e);
-            this.updateMagneticEffect(e);
-        });
+        const clickHandler = (e) => {
+            try {
+                this.recordInteraction('click', e);
+                this.createRippleEffect(e);
+            } catch (error) {
+                console.error('AI System: Click handler error', error);
+            }
+        };
+        
+        const hoverHandler = (e) => {
+            try {
+                this.recordInteraction('hover', e);
+                this.updateMagneticEffect(e);
+            } catch (error) {
+                console.error('AI System: Hover handler error', error);
+            }
+        };
+        
+        this.addEventListenerWithCleanup(document, 'click', clickHandler);
+        this.addEventListenerWithCleanup(document, 'mouseover', hoverHandler);
 
         // Advanced scroll tracking with velocity
         let scrollVelocity = 0;
         let lastScrollY = window.scrollY;
         let scrollTimeout;
 
-        window.addEventListener('scroll', () => {
-            const currentScrollY = window.scrollY;
-            scrollVelocity = currentScrollY - lastScrollY;
-            lastScrollY = currentScrollY;
+        const scrollHandler = () => {
+            try {
+                const currentScrollY = window.scrollY;
+                scrollVelocity = currentScrollY - lastScrollY;
+                lastScrollY = currentScrollY;
 
-            this.updateParallax(currentScrollY, scrollVelocity);
-            this.recordScrollPattern(currentScrollY, scrollVelocity);
+                this.updateParallax(currentScrollY, scrollVelocity);
+                this.recordScrollPattern(currentScrollY, scrollVelocity);
 
-            clearTimeout(scrollTimeout);
-            scrollTimeout = setTimeout(() => {
-                scrollVelocity = 0;
-            }, 100);
-        });
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(() => {
+                    scrollVelocity = 0;
+                }, 100);
+                this.timeouts.push(scrollTimeout);
+            } catch (error) {
+                console.error('AI System: Scroll handler error', error);
+            }
+        };
+        
+        this.addEventListenerWithCleanup(window, 'scroll', scrollHandler);
 
         // Intersection Observer for attention tracking
         this.setupAttentionTracking();
@@ -169,26 +187,33 @@ class AIAdaptiveSystem {
         magneticElements.forEach(element => {
             element.classList.add('magnetic-element');
             
-            element.addEventListener('mousemove', (e) => {
-                const rect = element.getBoundingClientRect();
-                const x = e.clientX - rect.left - rect.width / 2;
-                const y = e.clientY - rect.top - rect.height / 2;
-                
-                const distance = Math.sqrt(x * x + y * y);
-                const maxDistance = 100;
-                
-                if (distance < maxDistance) {
-                    const force = (maxDistance - distance) / maxDistance;
-                    const moveX = (x / distance) * force * 8;
-                    const moveY = (y / distance) * force * 8;
+            const mouseMoveHandler = (e) => {
+                try {
+                    const rect = element.getBoundingClientRect();
+                    const x = e.clientX - rect.left - rect.width / 2;
+                    const y = e.clientY - rect.top - rect.height / 2;
                     
-                    element.style.transform = `translateX(${moveX}px) translateY(${moveY}px) scale(${1 + force * 0.02})`;
+                    const distance = Math.sqrt(x * x + y * y);
+                    const maxDistance = 100;
+                    
+                    if (distance < maxDistance) {
+                        const force = (maxDistance - distance) / maxDistance;
+                        const moveX = (x / distance) * force * 8;
+                        const moveY = (y / distance) * force * 8;
+                        
+                        element.style.transform = `translateX(${moveX}px) translateY(${moveY}px) scale(${1 + force * 0.02})`;
+                    }
+                } catch (error) {
+                    console.error('AI System: Magnetic effect error', error);
                 }
-            });
+            };
             
-            element.addEventListener('mouseleave', () => {
+            const mouseLeaveHandler = () => {
                 element.style.transform = '';
-            });
+            };
+            
+            this.addEventListenerWithCleanup(element, 'mousemove', mouseMoveHandler);
+            this.addEventListenerWithCleanup(element, 'mouseleave', mouseLeaveHandler);
         });
     }
 

@@ -257,6 +257,8 @@
             
             // ローカルストレージに保存（デバッグ用）- 容量制限付き
             try {
+                // XSS対策: データのサニタイズ
+                const sanitizedData = JSON.parse(JSON.stringify(trackingData).replace(/<script[^>]*>.*?<\/script>/gi, ''));
                 const existingData = JSON.parse(localStorage.getItem('hp_analytics_data') || '[]');
                 
                 // 容量制限チェック（5MBまで）
@@ -267,7 +269,7 @@
                 }
                 
                 existingData.push({
-                    ...trackingData,
+                    ...sanitizedData,
                     sentAt: new Date().toISOString()
                 });
                 localStorage.setItem('hp_analytics_data', JSON.stringify(existingData));
@@ -313,7 +315,6 @@
                 console.error('HP Analytics: Failed to send data after all retries');
             }
         });
-        }
     }
 
     // ユーティリティ: スロットリング
