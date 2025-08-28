@@ -8,10 +8,10 @@
     'use strict';
 
     // 設定（本番環境用）
-    const HP_ANALYTICS_CONFIG = {
-        apiEndpoint: 'https://api.hp-analytics.example.com/track', // HTTPS必須
+    let HP_ANALYTICS_CONFIG = {
+        apiEndpoint: 'https://hp-analytics-system.vercel.app/api/track', // 修正: 有効なエンドポイント
         siteId: '', // 設置時に設定
-        debug: false, // 本番環境では必ずfalse
+        debug: true, // デバッグ用に一時的にtrue
         version: '2.0.0',
         maxEvents: 50, // メモリ使用量制限
         batchSize: 10,
@@ -28,7 +28,7 @@
     const requestTimes = [];
 
     // トラッキングデータ（容量制限付き）
-    const trackingData = {
+    let trackingData = {
         sessionId: generateSecureSessionId(),
         siteId: HP_ANALYTICS_CONFIG.siteId,
         pageViews: [],
@@ -368,12 +368,43 @@
 
     // セキュアなデータ送信
     function sendData() {
+        if (HP_ANALYTICS_CONFIG.debug) {
+            console.log('📊 HP Analytics: Starting data send process');
+        }
+        
         if (isRateLimited()) {
+            if (HP_ANALYTICS_CONFIG.debug) {
+                console.warn('📊 HP Analytics: Request rate limited');
+            }
             return; // レート制限
         }
         
-        if (!HP_ANALYTICS_CONFIG.siteId || !HP_ANALYTICS_CONFIG.apiEndpoint) {
-            return; // 設定不備
+        // siteId未設定時の処理
+        if (!HP_ANALYTICS_CONFIG.siteId) {
+            if (HP_ANALYTICS_CONFIG.debug) {
+                console.error('📊 HP Analytics: siteId is not set. Data will not be sent to API but saved locally in debug mode.');
+                
+                // デバッグモードでは localStorage に保存
+                saveToLocalStorage({
+                    error: 'siteId not configured',
+                    timestamp: Date.now(),
+                    data: {
+                        events: trackingData.events.slice(),
+                        pageViews: trackingData.pageViews.slice(),
+                        errors: trackingData.errors.slice(),
+                        performance: Object.assign({}, trackingData.performance),
+                        device: Object.assign({}, trackingData.device)
+                    }
+                });
+            }
+            return; // siteId未設定
+        }
+        
+        if (!HP_ANALYTICS_CONFIG.apiEndpoint) {
+            if (HP_ANALYTICS_CONFIG.debug) {
+                console.error('📊 HP Analytics: API endpoint is not configured');
+            }
+            return; // API設定不備
         }
         
         const payload = {
@@ -387,6 +418,13 @@
             device: Object.assign({}, trackingData.device)
         };
         
+        if (HP_ANALYTICS_CONFIG.debug) {
+            console.log('📊 HP Analytics: Preparing to send payload', payload);
+            
+            // デバッグモードではlocalStorageに保存
+            saveToLocalStorage(payload);
+        }
+        
         // データをクリア
         trackingData.events = [];
         trackingData.pageViews = [];
@@ -395,20 +433,86 @@
         // 送信試行
         sendWithRetry(payload, 0);
     }
+    
+    // デバッグモード時のlocalStorage保存
+    function saveToLocalStorage(payload) {
+        try {
+            // XSS対策: データのサニタイズ
+            const sanitizedPayload = sanitizeData(payload);
+            const existingData = JSON.parse(localStorage.getItem('hp_analytics_debug_data') || '[]');
+            
+            // 容量制限チェック（5MBまで）
+            const dataSize = JSON.stringify(existingData).length;
+            if (dataSize > 5 * 1024 * 1024) {
+                // 古いデータを削除（最新50件のみ保持）
+                existingData.splice(0, existingData.length - 50);
+                if (HP_ANALYTICS_CONFIG.debug) {
+                    console.log('📊 HP Analytics: Cleaned old localStorage data due to size limit');
+                }
+            }
+            
+            existingData.push({
+                ...sanitizedPayload,
+                savedAt: new Date().toISOString(),
+                debugMode: true
+            });
+            
+            localStorage.setItem('hp_analytics_debug_data', JSON.stringify(existingData));
+            
+            if (HP_ANALYTICS_CONFIG.debug) {
+                console.log('📊 HP Analytics: Data saved to localStorage. Total items:', existingData.length);
+                console.log('📊 HP Analytics: View debug data with: JSON.parse(localStorage.getItem("hp_analytics_debug_data"))');
+            }
+        } catch (error) {
+            if (HP_ANALYTICS_CONFIG.debug) {
+                console.error('📊 HP Analytics: Failed to save to localStorage:', error.message);
+            }
+        }
+    }
 
     // リトライ機能付き送信
     function sendWithRetry(payload, retryCount) {
         if (retryCount >= HP_ANALYTICS_CONFIG.maxRetries) {
+            if (HP_ANALYTICS_CONFIG.debug) {
+                console.error('📊 HP Analytics: Max retry attempts reached. Data sending failed permanently.');
+                
+                // 最終的にlocalStorageに保存（デバッグモード時）
+                saveToLocalStorage({
+                    ...payload,
+                    error: 'Max retries exceeded',
+                    finalAttempt: true
+                });
+            }
             return;
+        }
+        
+        if (HP_ANALYTICS_CONFIG.debug) {
+            console.log(`📊 HP Analytics: Sending data attempt ${retryCount + 1}/${HP_ANALYTICS_CONFIG.maxRetries + 1}`);
         }
         
         // sendBeacon API優先（ページ離脱時も送信）
         if (navigator.sendBeacon) {
-            const success = navigator.sendBeacon(
-                HP_ANALYTICS_CONFIG.apiEndpoint,
-                JSON.stringify(payload)
-            );
-            if (success) return;
+            try {
+                const success = navigator.sendBeacon(
+                    HP_ANALYTICS_CONFIG.apiEndpoint,
+                    JSON.stringify(payload)
+                );
+                
+                if (success) {
+                    if (HP_ANALYTICS_CONFIG.debug) {
+                        console.log('📊 HP Analytics: Data sent successfully via sendBeacon');
+                    }
+                    return;
+                } else {
+                    if (HP_ANALYTICS_CONFIG.debug) {
+                        console.warn('📊 HP Analytics: sendBeacon returned false, falling back to fetch');
+                    }
+                }
+            } catch (beaconError) {
+                if (HP_ANALYTICS_CONFIG.debug) {
+                    console.warn('📊 HP Analytics: sendBeacon failed:', beaconError.message);
+                }
+            }
         }
         
         // Fetch API fallback
@@ -421,12 +525,57 @@
                 },
                 body: JSON.stringify(payload),
                 keepalive: true // ページ離脱後も送信継続
-            }).catch(function() {
-                // リトライ
-                setTimeout(function() {
-                    sendWithRetry(payload, retryCount + 1);
-                }, Math.pow(2, retryCount) * 1000); // 指数バックオフ
+            })
+            .then(function(response) {
+                if (!response.ok) {
+                    throw new Error('HTTP error! status: ' + response.status);
+                }
+                
+                if (HP_ANALYTICS_CONFIG.debug) {
+                    console.log('📊 HP Analytics: Data sent successfully via fetch. Status:', response.status);
+                }
+            })
+            .catch(function(error) {
+                if (HP_ANALYTICS_CONFIG.debug) {
+                    console.error(`📊 HP Analytics: Fetch failed (attempt ${retryCount + 1}):`, error.message);
+                }
+                
+                // ネットワークエラーの詳細をログに記録
+                const isNetworkError = error.name === 'TypeError' || error.message.includes('network') || error.message.includes('fetch');
+                const isTimeoutError = error.name === 'TimeoutError' || error.message.includes('timeout');
+                const is5xxError = error.message.includes('status: 5');
+                
+                // リトライ可能なエラーかチェック
+                const shouldRetry = isNetworkError || isTimeoutError || is5xxError;
+                
+                if (shouldRetry) {
+                    const retryDelay = Math.pow(2, retryCount) * 1000; // 指数バックオフ
+                    
+                    if (HP_ANALYTICS_CONFIG.debug) {
+                        console.log(`📊 HP Analytics: Retrying in ${retryDelay}ms...`);
+                    }
+                    
+                    // リトライ
+                    setTimeout(function() {
+                        sendWithRetry(payload, retryCount + 1);
+                    }, retryDelay);
+                } else {
+                    if (HP_ANALYTICS_CONFIG.debug) {
+                        console.error('📊 HP Analytics: Non-retryable error occurred:', error.message);
+                        
+                        // 回復不可能なエラーの場合はlocalStorageに保存
+                        saveToLocalStorage({
+                            ...payload,
+                            error: 'Non-retryable error: ' + error.message,
+                            errorType: 'permanent'
+                        });
+                    }
+                }
             });
+        } else {
+            if (HP_ANALYTICS_CONFIG.debug) {
+                console.error('📊 HP Analytics: Neither sendBeacon nor fetch is available');
+            }
         }
     }
 
@@ -474,7 +623,33 @@
     // グローバルAPI（最小限）
     window.HPAnalytics = {
         trackEvent: trackEvent,
-        config: HP_ANALYTICS_CONFIG
+        config: HP_ANALYTICS_CONFIG,
+        // 設定更新関数
+        updateConfig: function(newConfig) {
+            if (newConfig && typeof newConfig === 'object') {
+                Object.assign(HP_ANALYTICS_CONFIG, newConfig);
+                // siteIdが更新された場合、trackingDataも更新
+                if (newConfig.siteId) {
+                    trackingData.siteId = newConfig.siteId;
+                }
+                if (HP_ANALYTICS_CONFIG.debug) {
+                    console.log('📊 HP Analytics: Config updated', HP_ANALYTICS_CONFIG);
+                }
+            }
+        },
+        // デバッグ情報取得
+        getDebugInfo: function() {
+            return {
+                config: HP_ANALYTICS_CONFIG,
+                trackingData: trackingData,
+                isInitialized: true,
+                version: HP_ANALYTICS_CONFIG.version
+            };
+        },
+        // 即座にデータ送信
+        flush: function() {
+            sendData();
+        }
     };
 
 })();
