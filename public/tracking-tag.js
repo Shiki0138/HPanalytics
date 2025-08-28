@@ -255,26 +255,64 @@
         if (HP_ANALYTICS_CONFIG.debug) {
             console.log('📊 HP Analytics: Sending data', trackingData);
             
-            // ローカルストレージに保存（デバッグ用）
-            const existingData = JSON.parse(localStorage.getItem('hp_analytics_data') || '[]');
-            existingData.push({
-                ...trackingData,
-                sentAt: new Date().toISOString()
-            });
-            localStorage.setItem('hp_analytics_data', JSON.stringify(existingData));
-            
-            console.log('📊 HP Analytics: Data saved to localStorage. View with: JSON.parse(localStorage.getItem("hp_analytics_data"))');
+            // ローカルストレージに保存（デバッグ用）- 容量制限付き
+            try {
+                const existingData = JSON.parse(localStorage.getItem('hp_analytics_data') || '[]');
+                
+                // 容量制限チェック（5MBまで）
+                const dataSize = JSON.stringify(existingData).length;
+                if (dataSize > 5 * 1024 * 1024) {
+                    // 古いデータを削除（最新100件のみ保持）
+                    existingData.splice(0, existingData.length - 100);
+                }
+                
+                existingData.push({
+                    ...trackingData,
+                    sentAt: new Date().toISOString()
+                });
+                localStorage.setItem('hp_analytics_data', JSON.stringify(existingData));
+                
+                console.log('📊 HP Analytics: Data saved to localStorage. View with: JSON.parse(localStorage.getItem("hp_analytics_data"))');
+            } catch (e) {
+                console.error('HP Analytics: Failed to save to localStorage', e);
+            }
         }
         
         // 実際のAPI送信（本番環境）
+        // エラーハンドリング強化とリトライ機構
         if (!HP_ANALYTICS_CONFIG.debug && HP_ANALYTICS_CONFIG.apiEndpoint) {
-            fetch(HP_ANALYTICS_CONFIG.apiEndpoint, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(trackingData)
-            }).catch(err => console.error('HP Analytics: Failed to send data', err));
+            sendWithRetry(trackingData, 0);
+        }
+    }
+    
+    // リトライ機構付きデータ送信
+    function sendWithRetry(data, attemptCount) {
+        const maxRetries = 3;
+        const retryDelay = 1000 * Math.pow(2, attemptCount); // Exponential backoff
+        
+        fetch(HP_ANALYTICS_CONFIG.apiEndpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+        })
+        .catch(err => {
+            console.error(`HP Analytics: Failed to send data (attempt ${attemptCount + 1})`, err);
+            
+            if (attemptCount < maxRetries) {
+                setTimeout(() => {
+                    sendWithRetry(data, attemptCount + 1);
+                }, retryDelay);
+            } else {
+                console.error('HP Analytics: Failed to send data after all retries');
+            }
+        });
         }
     }
 

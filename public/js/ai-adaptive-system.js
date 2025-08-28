@@ -22,6 +22,11 @@ class AIAdaptiveSystem {
             cpuUsage: 'low'
         };
         
+        // メモリリーク対策用のクリーンアップリスト
+        this.eventListeners = [];
+        this.intervals = [];
+        this.timeouts = [];
+        
         this.init();
     }
 
@@ -222,7 +227,7 @@ class AIAdaptiveSystem {
             threshold: [0, 0.25, 0.5, 0.75, 1]
         };
 
-        const observer = new IntersectionObserver((entries) => {
+        this.intersectionObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 const elementId = entry.target.id || entry.target.className;
                 const visibility = entry.intersectionRatio;
@@ -242,7 +247,7 @@ class AIAdaptiveSystem {
 
         // Observe all metric cards and important sections
         document.querySelectorAll('.metric-card-v2, .metric-card-3d, section').forEach(el => {
-            observer.observe(el);
+            this.intersectionObserver.observe(el);
         });
     }
 
@@ -314,12 +319,22 @@ class AIAdaptiveSystem {
         const particles = document.querySelectorAll('.particle');
         
         if (this.performanceMetrics.fps < 30) {
-            // Reduce particle count for better performance
-            particles.forEach((particle, index) => {
-                if (index % 2 === 0) {
-                    particle.style.display = 'none';
-                }
-            });
+            // パフォーマンス低下時の段階的な対応
+            if (this.performanceMetrics.fps < 20) {
+                // 深刻な場合：パーティクルの75%を非表示
+                particles.forEach((particle, index) => {
+                    if (index % 4 !== 0) {
+                        particle.style.display = 'none';
+                    }
+                });
+            } else {
+                // 軽度の場合：パーティクルの25%を非表示
+                particles.forEach((particle, index) => {
+                    if (index % 4 === 0) {
+                        particle.style.display = 'none';
+                    }
+                });
+            }
             
             // Disable some heavy animations
             document.documentElement.style.setProperty('--animation-performance-mode', 'reduced');
@@ -335,10 +350,13 @@ class AIAdaptiveSystem {
 
     startAdaptiveMonitoring() {
         // Analyze user behavior every 30 seconds
-        setInterval(() => {
+        const intervalId = setInterval(() => {
             this.analyzeUserBehavior();
             this.adaptInterface();
         }, 30000);
+        
+        // メモリリーク対策: インターバルIDを記録
+        this.intervals.push(intervalId);
     }
 
     analyzeUserBehavior() {
@@ -457,6 +475,37 @@ class AIAdaptiveSystem {
     forceAdaptation() {
         this.analyzeUserBehavior();
         this.adaptInterface();
+    }
+    
+    // メモリリーク対策: クリーンアップメソッド
+    destroy() {
+        // イベントリスナーの削除
+        this.eventListeners.forEach(({ element, event, handler }) => {
+            element.removeEventListener(event, handler);
+        });
+        this.eventListeners = [];
+        
+        // インターバルとタイムアウトのクリア
+        this.intervals.forEach(clearInterval);
+        this.timeouts.forEach(clearTimeout);
+        this.intervals = [];
+        this.timeouts = [];
+        
+        // オブザーバーの切断
+        if (this.intersectionObserver) {
+            this.intersectionObserver.disconnect();
+        }
+        
+        // データのクリア
+        this.userInteractionData = null;
+        this.adaptationRules.clear();
+        this.animationQueue = [];
+    }
+    
+    // イベントリスナー追加時の記録
+    addEventListenerWithCleanup(element, event, handler) {
+        element.addEventListener(event, handler);
+        this.eventListeners.push({ element, event, handler });
     }
 }
 
